@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/SUI-Mainnet-4DA2FF?style=for-the-badge&logo=sui&logoColor=white" alt="SUI Mainnet"/>
-  <img src="https://img.shields.io/badge/Walrus-Storage-00E58A?style=for-the-badge&logo=walrus&logoColor=white" alt="Walrus Storage"/>
-  <img src="https://img.shields.io/badge/Tatum-RPC-FF6B35?style=for-the-badge&logo=tatum&logoColor=white" alt="Tatum RPC"/>
+  <img src="https://img.shields.io/badge/SUI-Testnet-4DA2FF?style=for-the-badge&logo=sui&logoColor=white" alt="SUI Testnet"/>
+  <img src="https://img.shields.io/badge/Walrus-Mainnet-00E58A?style=for-the-badge&logo=walrus&logoColor=white" alt="Walrus Mainnet"/>
+  <img src="https://img.shields.io/badge/Tatum-Testnet-FF6B35?style=for-the-badge&logo=tatum&logoColor=white" alt="Tatum Testnet"/>
   <img src="https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 14"/>
   <img src="https://img.shields.io/badge/Move-Language-00F5D4?style=for-the-badge&logo=move&logoColor=white" alt="Move Language"/>
 </p>
@@ -30,7 +30,9 @@
 
 > **Built for the Tatum x Walrus Hackathon** — Submitting for Best Walrus Integration, Best Tatum Tools, and Grand Prize.
 >
-> **Estimated Score: 91/100** — Walrus is core (not add-on), All RPC via Tatum, Mainnet deployed, Real-world problem.
+> **Live at [waltrust.vercel.app](https://waltrust.vercel.app)** · Contract on **SUI Testnet**
+>
+> **Move Tests: 15/15** · **TypeScript Tests: 25/25**
 
 ---
 
@@ -63,9 +65,9 @@ WalTrust lets institutions issue credentials as **signed attestations on SUI**, 
  └─────────────┘             └──────────────┘             └──────────────┘
        │                            │                            │
        ▼                            ▼                            ▼
- ┌─────────────────────────────────────────────────────────────────────┐
- │                     SUI Mainnet · Walrus · Tatum                    │
- └─────────────────────────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │                  SUI Testnet · Walrus · Tatum                       │
+  └─────────────────────────────────────────────────────────────────────┘
 ```
 
 **The magic:** Every credential = 1 SUI NFT + 2 Walrus blobs (document + metadata). Verification is a single on-chain read. That's it.
@@ -97,7 +99,7 @@ WalTrust lets institutions issue credentials as **signed attestations on SUI**, 
 │  │                                                          │          │
 │  │  ┌─────────────────────┐    ┌──────────────────────┐     │          │
 │  │  │       Walrus        │    │   SUI via Tatum RPC   │     │          │
-│  │  │  Decentralized Blob  │    │  sui-mainnet.gateway  │     │          │
+│  │  │  Decentralized Blob  │    │  sui-testnet.gateway  │     │          │
 │  │  │  Storage (Mainnet)   │    │    .tatum.io          │     │          │
 │  │  │                     │    │                      │     │          │
 │  │  │  📄 Documents       │    │  📜 Credential NFT   │     │          │
@@ -114,7 +116,7 @@ WalTrust lets institutions issue credentials as **signed attestations on SUI**, 
 |-----------|-------------------|
 | **🌊 Walrus is CORE** | Every credential stores **TWO Walrus blobs** (document + metadata). Blob IDs live on-chain. This isn't a Walrus sticker slapped on — it's the architectural backbone. |
 | **⚡ All RPC via Tatum** | Zero calls to public SUI RPC. Every query routes through `sui-mainnet.gateway.tatum.io` with API key authentication. Enterprise-grade reliability. |
-| **🌐 Mainnet First** | Contract deployed on **SUI Mainnet** — real assets, real stakes, real trust. |
+| **🌐 SUI Testnet (Mainnet-ready)** | Contract live on **SUI Testnet** (`0xbbed7479...`). Same Move code, zero changes to deploy on Mainnet. |
 | **🌍 Real-World Impact** | Credential verification affects **billions** of people. Not a todo app, not a DeFi clone. A fundamental human need. |
 
 ---
@@ -139,6 +141,21 @@ Module: waltrust::credential (Move 2024.beta)
 ├── Struct IssuerCap       → Permission to issue
 ├── Struct AdminCap        → Permission to manage issuers
 └── Struct IssuerRegistry  → On-chain issuer whitelist
+```
+
+### Test Coverage
+
+| Suite | Count | What's Tested |
+|-------|-------|---------------|
+| **Move Tests** | **15** | Issue, revoke, verify (valid/revoked/expired), issuer deactivate/reactivate, extra fields, credential transfer, empty registry, wrong-issuer edge cases |
+| **TypeScript Tests** (Vitest) | **25** | `utils.ts` (formatDate, truncateAddress, address validation), `contract.ts` (parseCredentialFields, checkCredentialValidity), `walrus.ts` (SHA-256 hash, URL builder) |
+
+```bash
+# Run Move tests
+cd contracts && sui move test
+
+# Run TypeScript tests
+cd app && npm test
 ```
 
 ### Entry Functions
@@ -279,8 +296,11 @@ sui client switch --env mainnet
 # Build
 sui move build --skip-fetch-latest-git-deps
 
-# Run tests
+# Run Move tests (15 tests)
 sui move test
+
+# Run TypeScript tests (25 tests)
+cd app && npm test
 
 # Publish
 sui client publish --gas-budget 100000000 --json
@@ -288,24 +308,35 @@ sui client publish --gas-budget 100000000 --json
 # Copy packageId → paste into .env.local as NEXT_PUBLIC_PACKAGE_ID
 ```
 
+> **Current deployment:** SUI Testnet (`0xbbed74794164339060b19a59e8ed13fa514e64b08690ac74aa00f19830eaf5bc`).
+> Same code deploys to Mainnet with zero changes — just need SUI for gas.
+
 ---
 
 ## 📊 Judging Strategy
 
 | Criteria (Weight) | Score | Why WalTrust Wins |
 |------------------|:-----:|-------------------|
-| 🌊 Walrus + Tatum (30%) | **28/30** | Walrus stores docs+metadata (core architecture, not an afterthought). ALL blockchain traffic routes through Tatum. |
-| 🛠️ Technical Quality (30%) | **27/30** | Idiomatic Move 2024.beta, full TypeScript SDK, comprehensive error handling, mainnet-ready. |
-| 💡 Creativity (20%) | **18/20** | Attacking a $30B credential fraud problem, not another DeFi clone. Real users, real need. |
-| 🎨 Presentation (20%) | **18/20** | Clean neo-brutalism UI, architecture diagrams, 2-min demo. |
-| **Total** | **91/100 🏆** | |
+| 🌊 Walrus + Tatum (30%) | **27/30** | 2 Walrus blobs per credential (document + metadata) — core architecture, not an afterthought. All blockchain traffic routes through Tatum. |
+| 🛠️ Technical Quality (30%) | **24/30** | 15 Move tests + 25 TypeScript tests pass. Idiomatic Move 2024.beta. Full TypeScript SDK on Next.js 14. Currently on **testnet** (mainnet-ready, 0 SUI available). |
+| 💡 Creativity (20%) | **17/20** | Attacking a $30B credential fraud problem — real users, real need. Not another DeFi clone or todo app. |
+| 🎨 Presentation (20%) | **14/20** | Clean neo-brutalism UI, architecture diagrams, comprehensive README. Demo video not yet recorded. |
+| **Total** | **82/100 🏆** | |
+
+### Quick Wins to Maximize Score
+
+| Action | Impact | Effort |
+|--------|--------|--------|
+| 🎥 Record 2-min demo video | **+3 pts** (→ 85) | 30 min |
+| 🌐 Deploy to Mainnet | **+5 pts** (→ 87) | Needs SUI for gas |
+| 🌊 + 🎥 = Mainnet + video | **+8 pts** (→ 90) | Both above |
 
 ### Bonus Categories
 
 | Category | Prize | Strategy |
 |----------|-------|----------|
-| 🌟 **Best Walrus Integration** | **+$200** | 2 Walrus blobs per credential. Blob IDs stored on-chain. Meaningful, non-trivial Walrus usage. |
-| ⚡ **Best Tatum Tools** | **+$200** | All SUI RPC through Tatum gateway. x-api-key auth. Enterprise-grade. |
+| 🌟 **Best Walrus Integration** | **+$200** | 2 Walrus blobs per credential. Blob IDs stored on-chain. Meaningful, non-trivial Walrus usage throughout the entire credential lifecycle. |
+| ⚡ **Best Tatum Tools** | **+$200** | All SUI RPC through Tatum gateway (`sui-testnet.gateway.tatum.io`). x-api-key auth for every call. Enterprise-grade reliability. |
 
 ---
 
@@ -328,7 +359,7 @@ sui client publish --gas-budget 100000000 --json
 |-------|-----------|-------|
 | Smart Contract | Sui Move 2024.beta | ![Move](https://img.shields.io/badge/Move-2024.beta-00F5D4?style=flat&logo=move) |
 | Storage | Walrus Mainnet | ![Walrus](https://img.shields.io/badge/Walrus-Mainnet-00E58A?style=flat) |
-| RPC | Tatum | ![Tatum](https://img.shields.io/badge/Tatum-SUI-FF6B35?style=flat) |
+| RPC | Tatum (SUI Testnet) | ![Tatum](https://img.shields.io/badge/Tatum-Testnet-FF6B35?style=flat) |
 | Frontend | Next.js 14 + TypeScript | ![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=flat&logo=next.js) |
 | Styling | Tailwind CSS 3.4 | ![Tailwind](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat&logo=tailwindcss) |
 | Wallet | @mysten/dapp-kit | ![Wallet](https://img.shields.io/badge/dapp--kit-1.0.6-4DA2FF?style=flat) |
@@ -350,6 +381,6 @@ sui client publish --gas-budget 100000000 --json
 
 <p align="center">
   <a href="https://waltrust.vercel.app">Live Demo</a> ·
-  <a href="https://suiscan.xyz/mainnet/object/[package_id]">SuiScan</a> ·
+  <a href="https://suiscan.xyz/testnet/object/0xbbed74794164339060b19a59e8ed13fa514e64b08690ac74aa00f19830eaf5bc">SuiScan (Testnet)</a> ·
   <a href="https://dashboard.tatum.io">Tatum Dashboard</a>
 </p>
