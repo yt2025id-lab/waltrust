@@ -2,6 +2,7 @@
 name = "WalTrust"
 version = "1.0.0"
 edition = "2024.beta"
+published-at = "0xbbed74794164339060b19a59e8ed13fa514e64b08690ac74aa00f19830eaf5bc"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }

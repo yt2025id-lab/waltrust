@@ -1,13 +1,12 @@
 import { SuiJsonRpcClient } from "@mysten/sui/jsonRpc";
 import { JsonRpcHTTPTransport } from "@mysten/sui/jsonRpc";
-import type { NetworkConfig } from "@mysten/dapp-kit";
 
 const TATUM_API_KEY = process.env.TATUM_API_KEY || process.env.NEXT_PUBLIC_TATUM_API_KEY || "";
 
-export const TATUM_ENDPOINTS = {
-  mainnet: { url: "https://sui-mainnet.gateway.tatum.io", network: "mainnet" as const },
-  testnet: { url: "https://sui-testnet.gateway.tatum.io", network: "testnet" as const },
-  devnet: { url: "https://sui-devnet.gateway.tatum.io", network: "devnet" as const },
+export const TATUM_ENDPOINTS: Record<string, { url: string; network: "mainnet" | "testnet" | "devnet" }> = {
+  mainnet: { url: "https://sui-mainnet.gateway.tatum.io", network: "mainnet" },
+  testnet: { url: "https://sui-testnet.gateway.tatum.io", network: "testnet" },
+  devnet: { url: "https://sui-devnet.gateway.tatum.io", network: "devnet" },
 };
 
 export type SuiNetwork = "mainnet" | "testnet" | "devnet";
@@ -24,11 +23,7 @@ export function createTatumSuiClient(
       },
     },
   });
-
-  return new SuiJsonRpcClient({
-    transport,
-    network: network as any,
-  });
+  return new SuiJsonRpcClient({ transport, network: network as any });
 }
 
 export const network = (process.env.NEXT_PUBLIC_NETWORK || "mainnet") as SuiNetwork;

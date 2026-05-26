@@ -259,12 +259,12 @@ module waltrust::credential {
 
     /// Add extra field to credential (e.g., "student_id", "gpa")
     public fun add_extra_field(
-        _issuer_cap: &IssuerCap,
+        issuer_cap: &IssuerCap,
         credential: &mut Credential,
         key: vector<u8>,
         value: vector<u8>,
     ) {
-        assert!(_issuer_cap.issuer_address == credential.issuer, ENotCredentialIssuer);
+        assert!(issuer_cap.issuer_address == credential.issuer, ENotCredentialIssuer);
         vec_map::insert(&mut credential.extra_fields, string::utf8(key), string::utf8(value));
     }
 
