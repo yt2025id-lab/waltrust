@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WalTrust — Hackathon Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00E58A;
+    --green-dim: #00b86e;
+    --green-muted: rgba(0,229,138,0.12);
+    --green-border: rgba(0,229,138,0.25);
+    --blue: #3B82F6;
+    --blue-dim: rgba(59,130,246,0.15);
+    --amber: #F59E0B;
+    --amber-dim: rgba(245,158,11,0.12);
+    --red: #EF4444;
+    --bg: #0A0E17;
+    --bg2: #0F1520;
+    --bg3: #141c2e;
+    --surface: #1a2235;
+    --surface2: #1e2840;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #E8EDF5;
+    --text2: #8B95A9;
+    --text3: #5a6478;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+  /* LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+  /* HEADER */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    background: rgba(10,14,23,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .logo {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--green); }
+  .header-meta {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .badge-hackathon {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--green-muted);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+  .deadline-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--amber);
+    background: var(--amber-dim);
+    border: 1px solid rgba(245,158,11,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 5rem 0 4rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0,229,138,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--green);
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(40px, 6vw, 68px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 1rem;
+  }
+  .hero h1 .accent { color: var(--green); }
+  .hero-sub {
+    font-size: 18px;
+    color: var(--text2);
+    font-weight: 300;
+    max-width: 640px;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .stat-item { }
+  .stat-val {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    display: block;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  /* NAV PILLS */
+  .section-nav {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 73px;
+    background: rgba(10,14,23,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 90;
+  }
+  .nav-pills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .nav-pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    text-decoration: none;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    transition: all 0.15s;
+  }
+  .nav-pill:hover {
+    color: var(--green);
+    border-color: var(--green-border);
+    background: var(--green-muted);
+  }
+
+  /* SECTIONS */
+  .section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section:last-child { border-bottom: none; }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::before {
+    content: attr(data-num);
+    opacity: 0.4;
+  }
+  .section-title {
+    font-family: var(--display);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  .section-desc {
+    font-size: 15px;
+    color: var(--text2);
+    margin-bottom: 2.5rem;
+    max-width: 680px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-green { border-left: 3px solid var(--green); }
+  .card-blue { border-left: 3px solid var(--blue); }
+  .card-amber { border-left: 3px solid var(--amber); }
+  .card-red { border-left: 3px solid var(--red); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: #080c14;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block .lang-tag {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-file {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+  }
+  .code-desc { font-size: 12px; color: var(--text3); }
+  .code-wrap { margin: 1.25rem 0; }
+
+  /* SYNTAX COLORS */
+  .kw { color: #C792EA; }
+  .fn { color: #82AAFF; }
+  .str { color: #C3E88D; }
+  .num { color: #F78C6C; }
+  .cm { color: #546E7A; font-style: italic; }
+  .ty { color: #FFCB6B; }
+  .op { color: var(--green); }
+  .prop { color: #80CBC4; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+  .check-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--green-muted);
+    border: 1px solid var(--green-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 10px;
+    color: var(--green);
+  }
+
+  /* SCORE BARS */
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .score-label { font-size: 13px; color: var(--text2); min-width: 220px; }
+  .score-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .score-bar { height: 100%; border-radius: 3px; background: var(--green); }
+  .score-pct { font-family: var(--mono); font-size: 12px; color: var(--green); min-width: 36px; text-align: right; }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border2);
+  }
+  .tl-item {
+    position: relative;
+    padding-bottom: 2rem;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -1.6rem;
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 8px rgba(0,229,138,0.5);
+  }
+  .tl-day {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .tl-title {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .tl-tasks { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .tl-tasks li { font-size: 13px; color: var(--text2); display: flex; gap: 8px; }
+  .tl-tasks li::before { content: '→'; color: var(--text3); flex-shrink: 0; }
+
+  /* ARCH DIAGRAM */
+  .arch-box {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    text-align: center;
+  }
+  .arch-label { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .arch-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .arch-tech { font-family: var(--mono); font-size: 10px; color: var(--green); margin-top: 4px; }
+  .arch-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    display: flex;
+    gap: 10px;
+  }
+  .callout-green { background: var(--green-muted); border: 1px solid var(--green-border); }
+  .callout-amber { background: var(--amber-dim); border: 1px solid rgba(245,158,11,0.2); }
+  .callout-blue { background: var(--blue-dim); border: 1px solid rgba(59,130,246,0.2); }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout-text { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .callout-text strong { color: var(--text); }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface);
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border2);
+  }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td strong { color: var(--text); }
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+
+  /* INLINE */
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+    display: inline-block;
+  }
+  .tag-g { color: var(--green); border-color: var(--green-border); background: var(--green-muted); }
+  .tag-b { color: #82AAFF; border-color: rgba(130,170,255,0.2); background: rgba(130,170,255,0.08); }
+  .tag-a { color: var(--amber); border-color: rgba(245,158,11,0.2); background: var(--amber-dim); }
+  .tag-r { color: #F07878; border-color: rgba(240,120,120,0.2); background: rgba(240,120,120,0.08); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--green);
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem;
+    color: var(--text);
+  }
+  h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 1.25rem 0 0.5rem;
+  }
+  p { color: var(--text2); font-size: 14px; margin-bottom: 0.75rem; }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 0;
+    text-align: center;
+  }
+  .footer p { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .hero h1 { letter-spacing: -1px; }
+    .hero-stats { gap: 1.5rem; }
+    .header-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY HEADER -->
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">Wal<span>Trust</span></div>
+      <div class="header-meta">
+        <span class="badge-hackathon">TATUM × WALRUS HACKATHON 2026</span>
+        <span class="deadline-chip">⏳ DEADLINE: 6 JUN 17:00 UTC</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SECTION NAV -->
+<nav class="section-nav">
+  <div class="container">
+    <div class="nav-pills">
+      <a href="#overview" class="nav-pill">01 Overview</a>
+      <a href="#judging" class="nav-pill">02 Judging Strategy</a>
+      <a href="#architecture" class="nav-pill">03 Architecture</a>
+      <a href="#smart-contract" class="nav-pill">04 Smart Contract</a>
+      <a href="#walrus" class="nav-pill">05 Walrus Storage</a>
+      <a href="#tatum" class="nav-pill">06 Tatum RPC</a>
+      <a href="#frontend" class="nav-pill">07 Frontend</a>
+      <a href="#api" class="nav-pill">08 Backend API</a>
+      <a href="#roadmap" class="nav-pill">09 Roadmap</a>
+      <a href="#demo" class="nav-pill">10 Demo Strategy</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Full Hackathon Blueprint — Juara 1 Roadmap</div>
+    <h1>Wal<span class="accent">Trust</span><br>Credential Verifier</h1>
+    <p class="hero-sub">Decentralized credential verification system — ijazah, sertifikasi, dan pengalaman kerja disimpan di Walrus, diverifikasi on-chain di SUI, powered by Tatum RPC. Setiap detail teknis, strategi judging, dan roadmap 6 hari.</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-val">$600</span>
+        <span class="stat-label">target prize</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">+$400</span>
+        <span class="stat-label">bonus prizes</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">6 hari</span>
+        <span class="stat-label">build timeline</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">30%</span>
+        <span class="stat-label">walrus + tatum score</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 1: OVERVIEW ==================== -->
+<section class="section" id="overview">
+  <div class="container">
+    <div class="section-label" data-num="01">PROJECT OVERVIEW</div>
+    <h2 class="section-title">Apa itu WalTrust?</h2>
+    <p class="section-desc">Platform verifikasi kredensial Web3 pertama di ekosistem SUI. Institusi menerbitkan credential, user menyimpannya di Walrus, employer memverifikasi on-chain dalam hitungan detik.</p>
+
+    <div class="callout callout-green">
+      <span class="callout-icon">🎯</span>
+      <div class="callout-text">
+        <strong>Positioning sebagai Juri:</strong> "WalTrust adalah satu-satunya proyek yang membuktikan bahwa Walrus bukan sekadar 'IPFS yang lebih murah' — tapi infrastructure untuk trust layer baru di internet. Ini adalah killer app yang ekosistem SUI butuhkan."
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap:1rem; margin-top:1.5rem;">
+      <div class="card card-green">
+        <h4>Problem Statement</h4>
+        <p>Credential verification hari ini: lambat (hari–minggu), mahal (biaya administrasi), mudah dipalsukan, dan terpusat di satu institusi. LinkedIn bisa diisi sembarangan, ijazah bisa dipalsukan, sertifikasi expired tidak ter-update.</p>
+      </div>
+      <div class="card card-blue">
+        <h4>Solution</h4>
+        <p>Institusi (univ, lembaga sertifikasi) menerbitkan credential sebagai signed attestation di SUI. Dokumen asli disimpan di Walrus. Employer query langsung ke SUI + Walrus via Tatum RPC. Verification: &lt; 3 detik. Biaya: &lt; $0.01.</p>
+      </div>
+    </div>
+
+    <h3>User Roles & Flow</h3>
+    <div class="grid-3" style="margin-top: 0.5rem;">
+      <div class="card">
+        <div class="arch-label" style="text-align:left; color: var(--green);">ROLE 1</div>
+        <div class="arch-name" style="text-align:left; font-size:15px; font-weight:600; margin-bottom:6px;">Issuer</div>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span> Universitas / lembaga sertifikasi</li>
+          <li><span class="check-icon">✓</span> Upload dokumen ke Walrus</li>
+          <li><span class="check-icon">✓</span> Sign & issue credential di SUI</li>
+          <li><span class="check-icon">✓</span> Revoke jika perlu</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="arch-label" style="text-align:left; color: var(--blue);">ROLE 2</div>
+        <div class="arch-name" style="text-align:left; font-size:15px; font-weight:600; margin-bottom:6px;">Holder</div>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span> Job seeker / profesional</li>
+          <li><span class="check-icon">✓</span> Manage wallet credentials</li>
+          <li><span class="check-icon">✓</span> Share credential link ke employer</li>
+          <li><span class="check-icon">✓</span> Control akses dokumen</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="arch-label" style="text-align:left; color: var(--amber);">ROLE 3</div>
+        <div class="arch-name" style="text-align:left; font-size:15px; font-weight:600; margin-bottom:6px;">Verifier</div>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span> Employer / HR / recruiter</li>
+          <li><span class="check-icon">✓</span> Paste wallet address / credential ID</li>
+          <li><span class="check-icon">✓</span> Instant on-chain verification</li>
+          <li><span class="check-icon">✓</span> Lihat dokumen dari Walrus</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 2: JUDGING STRATEGY ==================== -->
+<section class="section" id="judging">
+  <div class="container">
+    <div class="section-label" data-num="02">JUDGING STRATEGY</div>
+    <h2 class="section-title">Strategi menang dari perspektif juri</h2>
+    <p class="section-desc">Breakdown 100 poin judging criteria dan cara WalTrust memenangkan setiap kategori secara sistematis.</p>
+
+    <div class="score-row"><span class="score-label">🟢 Walrus + Tatum Integration (30%)</span><div class="score-bar-wrap"><div class="score-bar" style="width:95%"></div></div><span class="score-pct">28/30</span></div>
+    <div class="score-row"><span class="score-label">⚡ Technical Quality (30%)</span><div class="score-bar-wrap"><div class="score-bar" style="width:90%"></div></div><span class="score-pct">27/30</span></div>
+    <div class="score-row"><span class="score-label">💡 Creativity (20%)</span><div class="score-bar-wrap"><div class="score-bar" style="width:92%"></div></div><span class="score-pct">18/20</span></div>
+    <div class="score-row"><span class="score-label">📹 Presentation (20%)</span><div class="score-bar-wrap"><div class="score-bar" style="width:88%"></div></div><span class="score-pct">18/20</span></div>
+    <div style="margin-top:8px; font-family: var(--mono); font-size: 13px; color: var(--green);">Estimasi total: 91/100 → 🥇 Juara 1</div>
+
+    <h3>Cara memenangkan tiap kategori</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kategori</th>
+            <th>Yang Juri Lihat</th>
+            <th>Implementasi WalTrust</th>
+            <th>Bobot</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Walrus Integration</strong></td>
+            <td>Walrus dipakai sebagai <em>core</em>, bukan add-on. Meaningful storage.</td>
+            <td>Semua dokumen credential (PDF/image) + metadata disimpan di Walrus. Blob ID on-chain. Revocation check via Walrus fetch.</td>
+            <td><span class="tag tag-g">20%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Tatum RPC Usage</strong></td>
+            <td>Semua on-chain call via Tatum endpoint, bukan public RPC lain.</td>
+            <td>Semua SuiClient dikonfigurasi ke <code>sui-mainnet.gateway.tatum.io</code> dengan API key. Query credential, event, object via Tatum.</td>
+            <td><span class="tag tag-g">10%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Technical Quality</strong></td>
+            <td>Clean Move code, successful deployment mainnet, error handling, README lengkap.</td>
+            <td>Move module terstruktur, unit test, deploy ke Sui Mainnet, CI/CD, TypeScript SDK, error boundaries di frontend.</td>
+            <td><span class="tag tag-b">30%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Creativity</strong></td>
+            <td>Unique use case, solves real problem, tidak generik.</td>
+            <td>Credential verification adalah masalah nyata milyaran orang. WalTrust = LinkedIn versi trustless. Bukan sekadar "todo app di blockchain".</td>
+            <td><span class="tag tag-a">20%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Presentation</strong></td>
+            <td>Demo video 2-3 menit yang jelas, README profesional, live demo link.</td>
+            <td>Script demo sudah direncanakan. Voiceover storytelling. GitHub README dengan arsitektur diagram + setup guide.</td>
+            <td><span class="tag tag-a">20%</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bonus: Best Walrus</strong></td>
+            <td>Most creative + effective Walrus use.</td>
+            <td>Walrus menyimpan PDF credential + revocation status metadata. Blob ID di-store on-chain. Access revocation in 1 tx.</td>
+            <td><span class="tag tag-g">+$200</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bonus: Best Tatum</strong></td>
+            <td>Leverage Tatum RPC, Data API, atau MCP.</td>
+            <td>Tatum RPC untuk semua query. Tatum Data API untuk transaction history. MCP server untuk AI features (opsional).</td>
+            <td><span class="tag tag-g">+$200</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-amber">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-text">
+        <strong>Critical:</strong> Deploy ke Sui MAINNET, bukan testnet. Judging criteria eksplisit menyebut "Sui Mainnet (preferred)" dan ini menjadi faktor pembeda terbesar dari proyek lain yang hanya deploy ke testnet/devnet.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 3: ARCHITECTURE ==================== -->
+<section class="section" id="architecture">
+  <div class="container">
+    <div class="section-label" data-num="03">SYSTEM ARCHITECTURE</div>
+    <h2 class="section-title">Full stack architecture</h2>
+    <p class="section-desc">Arsitektur lengkap dari user sampai ke smart contract — setiap komponen dan relasi antar layer.</p>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div style="display:grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap:8px; align-items:center;">
+        <div class="arch-box">
+          <div class="arch-label">LAYER 1</div>
+          <div class="arch-name">Frontend</div>
+          <div class="arch-tech">Next.js 14 + TypeScript</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">
+          <div class="arch-label">LAYER 2</div>
+          <div class="arch-name">Backend API</div>
+          <div class="arch-tech">Next.js API Routes</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" style="border-color: var(--green-border);">
+          <div class="arch-label">LAYER 3</div>
+          <div class="arch-name">Walrus</div>
+          <div class="arch-tech" style="color: var(--green);">Blob Storage</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box" style="border-color: rgba(59,130,246,0.3);">
+          <div class="arch-label">LAYER 4</div>
+          <div class="arch-name">SUI via Tatum</div>
+          <div class="arch-tech" style="color: #82AAFF;">Move Smart Contract</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Tech Stack Detail</h3>
+    <div class="grid-2">
+      <div>
+        <div class="card card-green" style="margin-bottom:1rem;">
+          <h4 style="margin-top:0;">Frontend</h4>
+          <ul class="checklist">
+            <li><span class="check-icon">→</span> Next.js 14 (App Router)</li>
+            <li><span class="check-icon">→</span> TypeScript strict mode</li>
+            <li><span class="check-icon">→</span> Tailwind CSS</li>
+            <li><span class="check-icon">→</span> @mysten/dapp-kit (Sui wallet adapter)</li>
+            <li><span class="check-icon">→</span> @mysten/sui (Sui TypeScript SDK)</li>
+            <li><span class="check-icon">→</span> Walrus TypeScript SDK</li>
+            <li><span class="check-icon">→</span> shadcn/ui components</li>
+          </ul>
+        </div>
+        <div class="card card-blue">
+          <h4 style="margin-top:0;">Smart Contract</h4>
+          <ul class="checklist">
+            <li><span class="check-icon">→</span> Move language (Sui Move)</li>
+            <li><span class="check-icon">→</span> Sui CLI untuk deploy</li>
+            <li><span class="check-icon">→</span> Module: waltrust::credential</li>
+            <li><span class="check-icon">→</span> Module: waltrust::issuer_registry</li>
+            <li><span class="check-icon">→</span> Unit tests dengan Move Test Framework</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card card-amber" style="margin-bottom:1rem;">
+          <h4 style="margin-top:0;">Storage (Walrus)</h4>
+          <ul class="checklist">
+            <li><span class="check-icon">→</span> Walrus Publisher API (PUT blobs)</li>
+            <li><span class="check-icon">→</span> Walrus Aggregator API (GET blobs)</li>
+            <li><span class="check-icon">→</span> Storage: dokumen PDF + metadata JSON</li>
+            <li><span class="check-icon">→</span> Epoch-based storage period (365 hari)</li>
+            <li><span class="check-icon">→</span> Content-addressed by Blob ID</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4 style="margin-top:0;">Blockchain (via Tatum RPC)</h4>
+          <ul class="checklist">
+            <li><span class="check-icon">→</span> Endpoint: sui-mainnet.gateway.tatum.io</li>
+            <li><span class="check-icon">→</span> SuiClient via Tatum API key header</li>
+            <li><span class="check-icon">→</span> Query credential objects</li>
+            <li><span class="check-icon">→</span> Transaction signing & execution</li>
+            <li><span class="check-icon">→</span> Event subscription</li>
+            <li><span class="check-icon">→</span> Tatum Data API: tx history</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h3>File Structure (Monorepo)</h3>
+    <div class="code-wrap">
+      <div class="code-block">
+        <span class="lang-tag">STRUCTURE</span>
+<span class="prop">waltrust/</span>
+├── <span class="prop">contracts/</span>              <span class="cm"># Move smart contracts</span>
+│   ├── <span class="str">Move.toml</span>
+│   └── <span class="prop">sources/</span>
+│       ├── <span class="str">credential.move</span>    <span class="cm"># Core credential NFT</span>
+│       ├── <span class="str">issuer.move</span>        <span class="cm"># Issuer registry</span>
+│       └── <span class="str">credential_tests.move</span>
+├── <span class="prop">app/</span>                    <span class="cm"># Next.js frontend + API</span>
+│   ├── <span class="prop">app/</span>
+│   │   ├── <span class="str">page.tsx</span>           <span class="cm"># Landing / verifier</span>
+│   │   ├── <span class="prop">issue/</span>
+│   │   │   └── <span class="str">page.tsx</span>       <span class="cm"># Issuer dashboard</span>
+│   │   ├── <span class="prop">wallet/</span>
+│   │   │   └── <span class="str">page.tsx</span>       <span class="cm"># Holder wallet view</span>
+│   │   ├── <span class="prop">verify/[id]/</span>
+│   │   │   └── <span class="str">page.tsx</span>       <span class="cm"># Public verifier page</span>
+│   │   └── <span class="prop">api/</span>
+│   │       ├── <span class="str">upload/route.ts</span>    <span class="cm"># Walrus upload endpoint</span>
+│   │       ├── <span class="str">credential/route.ts</span> <span class="cm"># Credential CRUD</span>
+│   │       └── <span class="str">verify/route.ts</span>    <span class="cm"># Verification endpoint</span>
+│   ├── <span class="prop">lib/</span>
+│   │   ├── <span class="str">sui-client.ts</span>      <span class="cm"># Tatum-configured SuiClient</span>
+│   │   ├── <span class="str">walrus.ts</span>          <span class="cm"># Walrus upload/fetch helpers</span>
+│   │   └── <span class="str">contract.ts</span>        <span class="cm"># Move call helpers</span>
+│   └── <span class="prop">components/</span>
+├── <span class="str">.env.local</span>              <span class="cm"># TATUM_API_KEY, CONTRACT_ID, dll</span>
+└── <span class="str">README.md</span>               <span class="cm"># Demo guide + architecture</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 4: SMART CONTRACT ==================== -->
+<section class="section" id="smart-contract">
+  <div class="container">
+    <div class="section-label" data-num="04">SMART CONTRACT</div>
+    <h2 class="section-title">Move Smart Contract</h2>
+    <p class="section-desc">Kode lengkap Move module untuk credential issuance, verification, dan revocation. Deploy-ready ke Sui Mainnet.</p>
+
+    <div class="callout callout-blue">
+      <span class="callout-icon">💡</span>
+      <div class="callout-text">
+        <strong>Move.toml config:</strong> Pastikan <code>[package] published-at</code> diisi setelah deploy mainnet. Ini penting untuk Tatum RPC agar bisa resolve package address dengan benar.
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">contracts/Move.toml</span>
+        <span class="code-desc">Package manifest</span>
+      </div>
+      <div class="code-block">
+<span class="cm"># contracts/Move.toml</span>
+[<span class="prop">package</span>]
+<span class="prop">name</span> = <span class="str">"WalTrust"</span>
+<span class="prop">version</span> = <span class="str">"1.0.0"</span>
+<span class="prop">edition</span> = <span class="str">"2024.beta"</span>
+
+[<span class="prop">dependencies</span>]
+<span class="prop">Sui</span> = { <span class="prop">git</span> = <span class="str">"https://github.com/MystenLabs/sui.git"</span>, <span class="prop">subdir</span> = <span class="str">"crates/sui-framework/packages/sui-framework"</span>, <span class="prop">rev</span> = <span class="str">"framework/mainnet"</span> }
+
+[<span class="prop">addresses</span>]
+<span class="prop">waltrust</span> = <span class="str">"0x0"</span>  <span class="cm"># Will be replaced after deploy</span>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">contracts/sources/credential.move</span>
+        <span class="code-desc">Core credential module — 90% dari nilai Walrus integration ada di sini</span>
+      </div>
+      <div class="code-block">
+<span class="cm">/// WalTrust — Decentralized Credential Verification System</span>
+<span class="cm">/// Stores credential metadata on-chain, documents on Walrus</span>
+<span class="kw">module</span> <span class="fn">waltrust</span>::<span class="fn">credential</span> {
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">object</span>::{<span class="ty">Self</span>, <span class="ty">UID</span>, <span class="ty">ID</span>};
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">tx_context</span>::{<span class="ty">Self</span>, <span class="ty">TxContext</span>};
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">transfer</span>;
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">event</span>;
+    <span class="kw">use</span> <span class="fn">std</span>::<span class="fn">string</span>::{<span class="ty">Self</span>, <span class="ty">String</span>};
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">clock</span>::{<span class="ty">Self</span>, <span class="ty">Clock</span>};
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">vec_map</span>::{<span class="ty">Self</span>, <span class="ty">VecMap</span>};
+
+    <span class="cm">// ============ STRUCTS ============</span>
+
+    <span class="cm">/// Main credential object — transferable NFT</span>
+    <span class="kw">public</span> <span class="kw">struct</span> <span class="ty">Credential</span> <span class="kw">has</span> <span class="ty">key</span>, <span class="ty">store</span> {
+        <span class="prop">id</span>: <span class="ty">UID</span>,
+        <span class="cm">/// Walrus Blob ID — dokumen asli tersimpan di sini</span>
+        <span class="prop">walrus_blob_id</span>: <span class="ty">String</span>,
+        <span class="cm">/// Walrus Blob ID untuk metadata JSON</span>
+        <span class="prop">walrus_metadata_blob_id</span>: <span class="ty">String</span>,
+        <span class="cm">/// Hash SHA-256 dari dokumen (verification layer kedua)</span>
+        <span class="prop">document_hash</span>: <span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt;,
+        <span class="cm">/// Tipe credential: "degree" | "certificate" | "work_experience"</span>
+        <span class="prop">credential_type</span>: <span class="ty">String</span>,
+        <span class="cm">/// Nama credential (e.g., "S1 Teknik Informatika")</span>
+        <span class="prop">title</span>: <span class="ty">String</span>,
+        <span class="cm">/// Institusi penerbit (address)</span>
+        <span class="prop">issuer</span>: <span class="ty">address</span>,
+        <span class="cm">/// Nama institusi (display)</span>
+        <span class="prop">issuer_name</span>: <span class="ty">String</span>,
+        <span class="cm">/// Penerima credential</span>
+        <span class="prop">recipient</span>: <span class="ty">address</span>,
+        <span class="cm">/// Nama penerima</span>
+        <span class="prop">recipient_name</span>: <span class="ty">String</span>,
+        <span class="cm">/// Tanggal issued (Unix timestamp ms)</span>
+        <span class="prop">issued_at</span>: <span class="ty">u64</span>,
+        <span class="cm">/// Tanggal expired (0 = tidak expired)</span>
+        <span class="prop">expires_at</span>: <span class="ty">u64</span>,
+        <span class="cm">/// Status: true = valid, false = revoked</span>
+        <span class="prop">is_valid</span>: <span class="ty">bool</span>,
+        <span class="cm">/// Extra fields untuk extensibility</span>
+        <span class="prop">extra_fields</span>: <span class="ty">VecMap</span>&lt;<span class="ty">String</span>, <span class="ty">String</span>&gt;,
+    }
+
+    <span class="cm">/// Capability untuk issuer yang terverifikasi</span>
+    <span class="kw">public</span> <span class="kw">struct</span> <span class="ty">IssuerCap</span> <span class="kw">has</span> <span class="ty">key</span>, <span class="ty">store</span> {
+        <span class="prop">id</span>: <span class="ty">UID</span>,
+        <span class="prop">issuer_address</span>: <span class="ty">address</span>,
+        <span class="prop">issuer_name</span>: <span class="ty">String</span>,
+        <span class="prop">is_active</span>: <span class="ty">bool</span>,
+    }
+
+    <span class="cm">/// Admin capability untuk mengelola issuer registry</span>
+    <span class="kw">public</span> <span class="kw">struct</span> <span class="ty">AdminCap</span> <span class="kw">has</span> <span class="ty">key</span>, <span class="ty">store</span> {
+        <span class="prop">id</span>: <span class="ty">UID</span>,
+    }
+
+    <span class="cm">// ============ EVENTS ============</span>
+
+    <span class="kw">public</span> <span class="kw">struct</span> <span class="ty">CredentialIssued</span> <span class="kw">has</span> <span class="ty">copy</span>, <span class="ty">drop</span> {
+        <span class="prop">credential_id</span>: <span class="ty">ID</span>,
+        <span class="prop">issuer</span>: <span class="ty">address</span>,
+        <span class="prop">recipient</span>: <span class="ty">address</span>,
+        <span class="prop">walrus_blob_id</span>: <span class="ty">String</span>,
+        <span class="prop">credential_type</span>: <span class="ty">String</span>,
+        <span class="prop">issued_at</span>: <span class="ty">u64</span>,
+    }
+
+    <span class="kw">public</span> <span class="kw">struct</span> <span class="ty">CredentialRevoked</span> <span class="kw">has</span> <span class="ty">copy</span>, <span class="ty">drop</span> {
+        <span class="prop">credential_id</span>: <span class="ty">ID</span>,
+        <span class="prop">revoked_by</span>: <span class="ty">address</span>,
+        <span class="prop">revoked_at</span>: <span class="ty">u64</span>,
+    }
+
+    <span class="kw">public</span> <span class="kw">struct</span> <span class="ty">CredentialVerified</span> <span class="kw">has</span> <span class="ty">copy</span>, <span class="ty">drop</span> {
+        <span class="prop">credential_id</span>: <span class="ty">ID</span>,
+        <span class="prop">verifier</span>: <span class="ty">address</span>,
+        <span class="prop">is_valid</span>: <span class="ty">bool</span>,
+        <span class="prop">verified_at</span>: <span class="ty">u64</span>,
+    }
+
+    <span class="cm">// ============ INIT ============</span>
+
+    <span class="kw">fun</span> <span class="fn">init</span>(<span class="prop">ctx</span>: &<span class="kw">mut</span> <span class="ty">TxContext</span>) {
+        <span class="cm">// Transfer AdminCap ke deployer</span>
+        <span class="kw">let</span> <span class="prop">admin_cap</span> = <span class="ty">AdminCap</span> {
+            <span class="prop">id</span>: <span class="fn">object</span>::<span class="fn">new</span>(<span class="prop">ctx</span>),
+        };
+        <span class="fn">transfer</span>::<span class="fn">transfer</span>(<span class="prop">admin_cap</span>, <span class="fn">tx_context</span>::<span class="fn">sender</span>(<span class="prop">ctx</span>));
+    }
+
+    <span class="cm">// ============ PUBLIC ENTRY FUNCTIONS ============</span>
+
+    <span class="cm">/// Issue credential baru — hanya IssuerCap holder yang bisa</span>
+    <span class="kw">public</span> <span class="kw">entry</span> <span class="kw">fun</span> <span class="fn">issue_credential</span>(
+        <span class="prop">issuer_cap</span>: &<span class="ty">IssuerCap</span>,
+        <span class="prop">walrus_blob_id</span>: <span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt;,
+        <span class="prop">walrus_metadata_blob_id</span>: <span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt;,
+        <span class="prop">document_hash</span>: <span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt;,
+        <span class="prop">credential_type</span>: <span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt;,
+        <span class="prop">title</span>: <span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt;,
+        <span class="prop">recipient</span>: <span class="ty">address</span>,
+        <span class="prop">recipient_name</span>: <span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt;,
+        <span class="prop">expires_at</span>: <span class="ty">u64</span>,
+        <span class="prop">clock</span>: &<span class="ty">Clock</span>,
+        <span class="prop">ctx</span>: &<span class="kw">mut</span> <span class="ty">TxContext</span>
+    ) {
+        <span class="fn">assert!</span>(<span class="prop">issuer_cap</span>.<span class="prop">is_active</span>, <span class="num">1001</span>); <span class="cm">// E_ISSUER_NOT_ACTIVE</span>
+
+        <span class="kw">let</span> <span class="prop">issued_at</span> = <span class="fn">clock</span>::<span class="fn">timestamp_ms</span>(<span class="prop">clock</span>);
+        <span class="kw">let</span> <span class="prop">credential_id</span> = <span class="fn">object</span>::<span class="fn">new</span>(<span class="prop">ctx</span>);
+        <span class="kw">let</span> <span class="prop">cred_obj_id</span> = <span class="fn">object</span>::<span class="fn">uid_to_inner</span>(&<span class="prop">credential_id</span>);
+
+        <span class="kw">let</span> <span class="prop">credential</span> = <span class="ty">Credential</span> {
+            <span class="prop">id</span>: <span class="prop">credential_id</span>,
+            <span class="prop">walrus_blob_id</span>: <span class="fn">string</span>::<span class="fn">utf8</span>(<span class="prop">walrus_blob_id</span>),
+            <span class="prop">walrus_metadata_blob_id</span>: <span class="fn">string</span>::<span class="fn">utf8</span>(<span class="prop">walrus_metadata_blob_id</span>),
+            <span class="prop">document_hash</span>,
+            <span class="prop">credential_type</span>: <span class="fn">string</span>::<span class="fn">utf8</span>(<span class="prop">credential_type</span>),
+            <span class="prop">title</span>: <span class="fn">string</span>::<span class="fn">utf8</span>(<span class="prop">title</span>),
+            <span class="prop">issuer</span>: <span class="prop">issuer_cap</span>.<span class="prop">issuer_address</span>,
+            <span class="prop">issuer_name</span>: <span class="prop">issuer_cap</span>.<span class="prop">issuer_name</span>,
+            <span class="prop">recipient</span>,
+            <span class="prop">recipient_name</span>: <span class="fn">string</span>::<span class="fn">utf8</span>(<span class="prop">recipient_name</span>),
+            <span class="prop">issued_at</span>,
+            <span class="prop">expires_at</span>,
+            <span class="prop">is_valid</span>: <span class="kw">true</span>,
+            <span class="prop">extra_fields</span>: <span class="fn">vec_map</span>::<span class="fn">empty</span>(),
+        };
+
+        <span class="cm">// Emit event — Tatum Data API bisa subscribe ke ini</span>
+        <span class="fn">event</span>::<span class="fn">emit</span>(<span class="ty">CredentialIssued</span> {
+            <span class="prop">credential_id</span>: <span class="prop">cred_obj_id</span>,
+            <span class="prop">issuer</span>: <span class="prop">issuer_cap</span>.<span class="prop">issuer_address</span>,
+            <span class="prop">recipient</span>,
+            <span class="prop">walrus_blob_id</span>: <span class="prop">credential</span>.<span class="prop">walrus_blob_id</span>,
+            <span class="prop">credential_type</span>: <span class="prop">credential</span>.<span class="prop">credential_type</span>,
+            <span class="prop">issued_at</span>,
+        });
+
+        <span class="cm">// Transfer credential ke recipient</span>
+        <span class="fn">transfer</span>::<span class="fn">transfer</span>(<span class="prop">credential</span>, <span class="prop">recipient</span>);
+    }
+
+    <span class="cm">/// Revoke credential — hanya issuer asli yang bisa</span>
+    <span class="kw">public</span> <span class="kw">entry</span> <span class="kw">fun</span> <span class="fn">revoke_credential</span>(
+        <span class="prop">issuer_cap</span>: &<span class="ty">IssuerCap</span>,
+        <span class="prop">credential</span>: &<span class="kw">mut</span> <span class="ty">Credential</span>,
+        <span class="prop">clock</span>: &<span class="ty">Clock</span>,
+        <span class="prop">ctx</span>: &<span class="kw">mut</span> <span class="ty">TxContext</span>
+    ) {
+        <span class="fn">assert!</span>(<span class="prop">issuer_cap</span>.<span class="prop">issuer_address</span> == <span class="prop">credential</span>.<span class="prop">issuer</span>, <span class="num">1002</span>);
+        <span class="fn">assert!</span>(<span class="prop">credential</span>.<span class="prop">is_valid</span>, <span class="num">1003</span>); <span class="cm">// Already revoked</span>
+
+        <span class="prop">credential</span>.<span class="prop">is_valid</span> = <span class="kw">false</span>;
+
+        <span class="fn">event</span>::<span class="fn">emit</span>(<span class="ty">CredentialRevoked</span> {
+            <span class="prop">credential_id</span>: <span class="fn">object</span>::<span class="fn">uid_to_inner</span>(&<span class="prop">credential</span>.<span class="prop">id</span>),
+            <span class="prop">revoked_by</span>: <span class="fn">tx_context</span>::<span class="fn">sender</span>(<span class="prop">ctx</span>),
+            <span class="prop">revoked_at</span>: <span class="fn">clock</span>::<span class="fn">timestamp_ms</span>(<span class="prop">clock</span>),
+        });
+    }
+
+    <span class="cm">/// Public verify — siapa saja bisa query status credential</span>
+    <span class="kw">public</span> <span class="kw">fun</span> <span class="fn">verify_credential</span>(
+        <span class="prop">credential</span>: &<span class="ty">Credential</span>,
+        <span class="prop">clock</span>: &<span class="ty">Clock</span>,
+        <span class="prop">ctx</span>: &<span class="kw">mut</span> <span class="ty">TxContext</span>
+    ): <span class="ty">bool</span> {
+        <span class="kw">let</span> <span class="prop">now</span> = <span class="fn">clock</span>::<span class="fn">timestamp_ms</span>(<span class="prop">clock</span>);
+        <span class="kw">let</span> <span class="prop">not_expired</span> = <span class="prop">credential</span>.<span class="prop">expires_at</span> == <span class="num">0</span> || <span class="prop">now</span> &lt; <span class="prop">credential</span>.<span class="prop">expires_at</span>;
+        <span class="kw">let</span> <span class="prop">is_valid</span> = <span class="prop">credential</span>.<span class="prop">is_valid</span> &amp;&amp; <span class="prop">not_expired</span>;
+
+        <span class="fn">event</span>::<span class="fn">emit</span>(<span class="ty">CredentialVerified</span> {
+            <span class="prop">credential_id</span>: <span class="fn">object</span>::<span class="fn">uid_to_inner</span>(&<span class="prop">credential</span>.<span class="prop">id</span>),
+            <span class="prop">verifier</span>: <span class="fn">tx_context</span>::<span class="fn">sender</span>(<span class="prop">ctx</span>),
+            <span class="prop">is_valid</span>,
+            <span class="prop">verified_at</span>: <span class="prop">now</span>,
+        });
+        <span class="prop">is_valid</span>
+    }
+
+    <span class="cm">// ============ VIEW FUNCTIONS ============</span>
+
+    <span class="kw">public</span> <span class="kw">fun</span> <span class="fn">get_walrus_blob_id</span>(<span class="prop">c</span>: &<span class="ty">Credential</span>): &<span class="ty">String</span> { &<span class="prop">c</span>.<span class="prop">walrus_blob_id</span> }
+    <span class="kw">public</span> <span class="kw">fun</span> <span class="fn">get_issuer</span>(<span class="prop">c</span>: &<span class="ty">Credential</span>): <span class="ty">address</span> { <span class="prop">c</span>.<span class="prop">issuer</span> }
+    <span class="kw">public</span> <span class="kw">fun</span> <span class="fn">get_recipient</span>(<span class="prop">c</span>: &<span class="ty">Credential</span>): <span class="ty">address</span> { <span class="prop">c</span>.<span class="prop">recipient</span> }
+    <span class="kw">public</span> <span class="kw">fun</span> <span class="fn">is_valid</span>(<span class="prop">c</span>: &<span class="ty">Credential</span>): <span class="ty">bool</span> { <span class="prop">c</span>.<span class="prop">is_valid</span> }
+    <span class="kw">public</span> <span class="kw">fun</span> <span class="fn">get_document_hash</span>(<span class="prop">c</span>: &<span class="ty">Credential</span>): &<span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt; { &<span class="prop">c</span>.<span class="prop">document_hash</span> }
+}
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">contracts/sources/issuer.move</span>
+        <span class="code-desc">Issuer registry — admin approve issuer resmi</span>
+      </div>
+      <div class="code-block">
+<span class="kw">module</span> <span class="fn">waltrust</span>::<span class="fn">issuer</span> {
+    <span class="kw">use</span> <span class="fn">waltrust</span>::<span class="fn">credential</span>::{<span class="ty">AdminCap</span>, <span class="ty">IssuerCap</span>};
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">object</span>::{<span class="ty">Self</span>, <span class="ty">UID</span>};
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">transfer</span>;
+    <span class="kw">use</span> <span class="fn">sui</span>::<span class="fn">tx_context</span>::<span class="ty">TxContext</span>;
+    <span class="kw">use</span> <span class="fn">std</span>::<span class="fn">string</span>;
+
+    <span class="cm">/// Admin approve issuer baru (universitas, lembaga sertifikasi)</span>
+    <span class="kw">public</span> <span class="kw">entry</span> <span class="kw">fun</span> <span class="fn">approve_issuer</span>(
+        <span class="prop">_admin</span>: &<span class="ty">AdminCap</span>,
+        <span class="prop">issuer_address</span>: <span class="ty">address</span>,
+        <span class="prop">issuer_name</span>: <span class="ty">vector</span>&lt;<span class="ty">u8</span>&gt;,
+        <span class="prop">ctx</span>: &<span class="kw">mut</span> <span class="ty">TxContext</span>
+    ) {
+        <span class="kw">let</span> <span class="prop">cap</span> = <span class="ty">IssuerCap</span> {
+            <span class="prop">id</span>: <span class="fn">object</span>::<span class="fn">new</span>(<span class="prop">ctx</span>),
+            <span class="prop">issuer_address</span>,
+            <span class="prop">issuer_name</span>: <span class="fn">string</span>::<span class="fn">utf8</span>(<span class="prop">issuer_name</span>),
+            <span class="prop">is_active</span>: <span class="kw">true</span>,
+        };
+        <span class="fn">transfer</span>::<span class="fn">transfer</span>(<span class="prop">cap</span>, <span class="prop">issuer_address</span>);
+    }
+}
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">Deploy ke Mainnet</span>
+        <span class="code-desc">Perintah deploy lengkap</span>
+      </div>
+      <div class="code-block">
+<span class="cm"># 1. Switch ke Mainnet</span>
+<span class="op">sui</span> client switch --env mainnet
+
+<span class="cm"># 2. Build & verify</span>
+<span class="op">sui</span> move build --skip-fetch-latest-git-deps
+
+<span class="cm"># 3. Test sebelum deploy</span>
+<span class="op">sui</span> move test
+
+<span class="cm"># 4. Deploy ke Mainnet</span>
+<span class="op">sui</span> client publish \
+  --gas-budget <span class="num">100000000</span> \
+  --json
+
+<span class="cm"># 5. Simpan package ID dari output:</span>
+<span class="cm"># "packageId": "0x..." → masuk ke .env</span>
+<span class="cm"># "objectId" AdminCap → simpan untuk approve issuer</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 5: WALRUS ==================== -->
+<section class="section" id="walrus">
+  <div class="container">
+    <div class="section-label" data-num="05">WALRUS INTEGRATION</div>
+    <h2 class="section-title">Walrus Storage Layer</h2>
+    <p class="section-desc">Cara WalTrust menggunakan Walrus sebagai core storage — bukan add-on. Ini adalah kunci untuk memenangkan bonus "Best Walrus Integration" senilai $200.</p>
+
+    <div class="callout callout-green">
+      <span class="callout-icon">🏆</span>
+      <div class="callout-text">
+        <strong>Winning formula Walrus:</strong> Simpan 2 blobs per credential — (1) dokumen asli PDF/image, (2) metadata JSON. Blob ID keduanya di-store on-chain di SUI. Ini membuktikan <em>meaningful integration</em> yang juri cari.
+      </div>
+    </div>
+
+    <h3>Walrus Endpoints</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Endpoint</th><th>URL</th><th>Digunakan untuk</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Publisher (Mainnet)</strong></td><td><code>https://publisher.walrus-mainnet.walrus.space</code></td><td>Upload dokumen credential</td></tr>
+          <tr><td><strong>Aggregator (Mainnet)</strong></td><td><code>https://aggregator.walrus-mainnet.walrus.space</code></td><td>Fetch dokumen untuk display</td></tr>
+          <tr><td><strong>Publisher (Testnet)</strong></td><td><code>https://publisher.walrus-testnet.walrus.space</code></td><td>Development & testing</td></tr>
+          <tr><td><strong>Aggregator (Testnet)</strong></td><td><code>https://aggregator.walrus-testnet.walrus.space</code></td><td>Development & testing</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">app/lib/walrus.ts</span>
+        <span class="code-desc">Complete Walrus upload + fetch helper</span>
+      </div>
+      <div class="code-block">
+<span class="cm">// app/lib/walrus.ts</span>
+<span class="kw">const</span> <span class="prop">WALRUS_PUBLISHER</span> = <span class="str">"https://publisher.walrus-mainnet.walrus.space"</span>;
+<span class="kw">const</span> <span class="prop">WALRUS_AGGREGATOR</span> = <span class="str">"https://aggregator.walrus-mainnet.walrus.space"</span>;
+<span class="kw">const</span> <span class="prop">STORAGE_EPOCHS</span> = <span class="num">365</span>; <span class="cm">// ~1 tahun</span>
+
+<span class="kw">export interface</span> <span class="ty">WalrusUploadResult</span> {
+  <span class="prop">blobId</span>: <span class="ty">string</span>;
+  <span class="prop">suiObjectId</span>: <span class="ty">string</span>;
+  <span class="prop">endEpoch</span>: <span class="ty">number</span>;
+  <span class="prop">isNewlyCreated</span>: <span class="ty">boolean</span>;
+}
+
+<span class="kw">export interface</span> <span class="ty">CredentialMetadata</span> {
+  <span class="prop">title</span>: <span class="ty">string</span>;
+  <span class="prop">credentialType</span>: <span class="ty">string</span>;
+  <span class="prop">issuerName</span>: <span class="ty">string</span>;
+  <span class="prop">recipientName</span>: <span class="ty">string</span>;
+  <span class="prop">issuedAt</span>: <span class="ty">string</span>; <span class="cm">// ISO date</span>
+  <span class="prop">expiresAt</span>: <span class="ty">string</span> | <span class="kw">null</span>;
+  <span class="prop">additionalInfo</span>: <span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">string</span>&gt;;
+}
+
+<span class="cm">/**
+ * Upload file blob ke Walrus
+ * Returns blob ID yang akan disimpan on-chain di SUI
+ */</span>
+<span class="kw">export async function</span> <span class="fn">uploadToWalrus</span>(
+  <span class="prop">fileData</span>: <span class="ty">Uint8Array</span> | <span class="ty">Blob</span>,
+  <span class="prop">contentType</span>: <span class="ty">string</span> = <span class="str">"application/octet-stream"</span>
+): <span class="ty">Promise</span>&lt;<span class="ty">WalrusUploadResult</span>&gt; {
+  <span class="kw">const</span> <span class="prop">response</span> = <span class="kw">await</span> <span class="fn">fetch</span>(
+    <span class="str">`</span><span class="prop">${WALRUS_PUBLISHER}</span><span class="str">/v1/blobs?epochs=</span><span class="prop">${STORAGE_EPOCHS}</span><span class="str">`</span>,
+    {
+      <span class="prop">method</span>: <span class="str">"PUT"</span>,
+      <span class="prop">headers</span>: { <span class="str">"Content-Type"</span>: <span class="prop">contentType</span> },
+      <span class="prop">body</span>: <span class="prop">fileData</span>,
+    }
+  );
+
+  <span class="kw">if</span> (!<span class="prop">response</span>.<span class="prop">ok</span>) {
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">`Walrus upload failed: </span><span class="prop">${response.status}</span><span class="str">`</span>);
+  }
+
+  <span class="kw">const</span> <span class="prop">result</span> = <span class="kw">await</span> <span class="prop">response</span>.<span class="fn">json</span>();
+
+  <span class="cm">// Handle both newlyCreated and alreadyCertified responses</span>
+  <span class="kw">if</span> (<span class="prop">result</span>.<span class="prop">newlyCreated</span>) {
+    <span class="kw">return</span> {
+      <span class="prop">blobId</span>: <span class="prop">result</span>.<span class="prop">newlyCreated</span>.<span class="prop">blobObject</span>.<span class="prop">blobId</span>,
+      <span class="prop">suiObjectId</span>: <span class="prop">result</span>.<span class="prop">newlyCreated</span>.<span class="prop">blobObject</span>.<span class="prop">id</span>,
+      <span class="prop">endEpoch</span>: <span class="prop">result</span>.<span class="prop">newlyCreated</span>.<span class="prop">blobObject</span>.<span class="prop">storage</span>.<span class="prop">endEpoch</span>,
+      <span class="prop">isNewlyCreated</span>: <span class="kw">true</span>,
+    };
+  } <span class="kw">else if</span> (<span class="prop">result</span>.<span class="prop">alreadyCertified</span>) {
+    <span class="kw">return</span> {
+      <span class="prop">blobId</span>: <span class="prop">result</span>.<span class="prop">alreadyCertified</span>.<span class="prop">blobId</span>,
+      <span class="prop">suiObjectId</span>: <span class="str">""</span>,
+      <span class="prop">endEpoch</span>: <span class="prop">result</span>.<span class="prop">alreadyCertified</span>.<span class="prop">endEpoch</span>,
+      <span class="prop">isNewlyCreated</span>: <span class="kw">false</span>,
+    };
+  }
+
+  <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">"Unexpected Walrus response format"</span>);
+}
+
+<span class="cm">/**
+ * Upload metadata JSON ke Walrus
+ * Metadata berisi info credential yang bisa dibaca tanpa buka PDF
+ */</span>
+<span class="kw">export async function</span> <span class="fn">uploadMetadataToWalrus</span>(
+  <span class="prop">metadata</span>: <span class="ty">CredentialMetadata</span>
+): <span class="ty">Promise</span>&lt;<span class="ty">WalrusUploadResult</span>&gt; {
+  <span class="kw">const</span> <span class="prop">jsonBytes</span> = <span class="kw">new</span> <span class="fn">TextEncoder</span>().<span class="fn">encode</span>(<span class="fn">JSON</span>.<span class="fn">stringify</span>(<span class="prop">metadata</span>));
+  <span class="kw">return</span> <span class="fn">uploadToWalrus</span>(<span class="prop">jsonBytes</span>, <span class="str">"application/json"</span>);
+}
+
+<span class="cm">/**
+ * Fetch blob dari Walrus by Blob ID
+ * Digunakan di verifier page untuk tampilkan dokumen
+ */</span>
+<span class="kw">export async function</span> <span class="fn">fetchFromWalrus</span>(<span class="prop">blobId</span>: <span class="ty">string</span>): <span class="ty">Promise</span>&lt;<span class="ty">Blob</span>&gt; {
+  <span class="kw">const</span> <span class="prop">response</span> = <span class="kw">await</span> <span class="fn">fetch</span>(
+    <span class="str">`</span><span class="prop">${WALRUS_AGGREGATOR}</span><span class="str">/v1/blobs/</span><span class="prop">${blobId}</span><span class="str">`</span>
+  );
+
+  <span class="kw">if</span> (!<span class="prop">response</span>.<span class="prop">ok</span>) {
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">`Walrus fetch failed for blob: </span><span class="prop">${blobId}</span><span class="str">`</span>);
+  }
+
+  <span class="kw">return</span> <span class="prop">response</span>.<span class="fn">blob</span>();
+}
+
+<span class="cm">/**
+ * Fetch metadata JSON dari Walrus
+ */</span>
+<span class="kw">export async function</span> <span class="fn">fetchMetadataFromWalrus</span>(
+  <span class="prop">metadataBlobId</span>: <span class="ty">string</span>
+): <span class="ty">Promise</span>&lt;<span class="ty">CredentialMetadata</span>&gt; {
+  <span class="kw">const</span> <span class="prop">blob</span> = <span class="kw">await</span> <span class="fn">fetchFromWalrus</span>(<span class="prop">metadataBlobId</span>);
+  <span class="kw">const</span> <span class="prop">text</span> = <span class="kw">await</span> <span class="prop">blob</span>.<span class="fn">text</span>();
+  <span class="kw">return</span> <span class="fn">JSON</span>.<span class="fn">parse</span>(<span class="prop">text</span>) <span class="kw">as</span> <span class="ty">CredentialMetadata</span>;
+}
+
+<span class="cm">/**
+ * Compute SHA-256 hash dari file (untuk on-chain verification)
+ */</span>
+<span class="kw">export async function</span> <span class="fn">hashFile</span>(<span class="prop">fileData</span>: <span class="ty">ArrayBuffer</span>): <span class="ty">Promise</span>&lt;<span class="ty">Uint8Array</span>&gt; {
+  <span class="kw">const</span> <span class="prop">hashBuffer</span> = <span class="kw">await</span> <span class="prop">crypto</span>.<span class="prop">subtle</span>.<span class="fn">digest</span>(<span class="str">"SHA-256"</span>, <span class="prop">fileData</span>);
+  <span class="kw">return new</span> <span class="fn">Uint8Array</span>(<span class="prop">hashBuffer</span>);
+}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 6: TATUM ==================== -->
+<section class="section" id="tatum">
+  <div class="container">
+    <div class="section-label" data-num="06">TATUM RPC INTEGRATION</div>
+    <h2 class="section-title">Tatum RPC — SuiClient Configuration</h2>
+    <p class="section-desc">Semua on-chain call wajib melalui Tatum endpoint. Ini adalah requirement utama yang tidak boleh dilupakan.</p>
+
+    <div class="callout callout-amber">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-text">
+        <strong>WAJIB:</strong> Jangan pernah pakai public SUI RPC (<code>https://fullnode.mainnet.sui.io</code>) di kode yang di-submit. Semua query harus via Tatum. Juri akan cek kode dan README.
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">app/lib/sui-client.ts</span>
+        <span class="code-desc">Tatum-configured SuiClient — pakai di seluruh app</span>
+      </div>
+      <div class="code-block">
+<span class="cm">// app/lib/sui-client.ts</span>
+<span class="kw">import</span> { <span class="ty">SuiClient</span>, <span class="ty">getFullnodeUrl</span> } <span class="kw">from</span> <span class="str">"@mysten/sui/client"</span>;
+
+<span class="kw">const</span> <span class="prop">TATUM_API_KEY</span> = <span class="prop">process</span>.<span class="prop">env</span>.<span class="prop">TATUM_API_KEY</span>!;
+
+<span class="cm">// Tatum RPC endpoints untuk SUI</span>
+<span class="kw">export const</span> <span class="prop">TATUM_ENDPOINTS</span> = {
+  <span class="prop">mainnet</span>: <span class="str">"https://sui-mainnet.gateway.tatum.io"</span>,
+  <span class="prop">testnet</span>: <span class="str">"https://sui-testnet.gateway.tatum.io"</span>,
+  <span class="prop">devnet</span>:  <span class="str">"https://sui-devnet.gateway.tatum.io"</span>,
+};
+
+<span class="cm">/**
+ * Singleton SuiClient via Tatum RPC
+ * Gunakan ini di SELURUH aplikasi — jangan buat SuiClient baru
+ */</span>
+<span class="kw">export function</span> <span class="fn">createTatumSuiClient</span>(
+  <span class="prop">network</span>: <span class="str">"mainnet"</span> | <span class="str">"testnet"</span> | <span class="str">"devnet"</span> = <span class="str">"mainnet"</span>
+): <span class="ty">SuiClient</span> {
+  <span class="kw">return new</span> <span class="fn">SuiClient</span>({
+    <span class="prop">url</span>: <span class="prop">TATUM_ENDPOINTS</span>[<span class="prop">network</span>],
+    <span class="cm">// Inject Tatum API key ke setiap request</span>
+    <span class="prop">rpcClient</span>: {
+      <span class="prop">requestMiddleware</span>: (<span class="prop">params</span>) => ({
+        ...<span class="prop">params</span>,
+        <span class="prop">headers</span>: {
+          ...<span class="prop">params</span>.<span class="prop">headers</span>,
+          <span class="str">"x-api-key"</span>: <span class="prop">TATUM_API_KEY</span>,
+        },
+      }),
+    },
+  });
+}
+
+<span class="cm">// Singleton instances</span>
+<span class="kw">export const</span> <span class="prop">suiClient</span> = <span class="fn">createTatumSuiClient</span>(<span class="str">"mainnet"</span>);
+
+<span class="cm">// Package address setelah deploy</span>
+<span class="kw">export const</span> <span class="prop">CONTRACT</span> = {
+  <span class="prop">packageId</span>: <span class="prop">process</span>.<span class="prop">env</span>.<span class="prop">NEXT_PUBLIC_PACKAGE_ID</span>!,
+  <span class="prop">credentialModule</span>: <span class="str">"credential"</span>,
+  <span class="prop">issuerModule</span>: <span class="str">"issuer"</span>,
+};
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">app/lib/contract.ts</span>
+        <span class="code-desc">Helper functions untuk semua Move calls via Tatum</span>
+      </div>
+      <div class="code-block">
+<span class="cm">// app/lib/contract.ts</span>
+<span class="kw">import</span> { <span class="ty">Transaction</span> } <span class="kw">from</span> <span class="str">"@mysten/sui/transactions"</span>;
+<span class="kw">import</span> { <span class="prop">suiClient</span>, <span class="prop">CONTRACT</span> } <span class="kw">from</span> <span class="str">"./sui-client"</span>;
+<span class="kw">import</span> <span class="kw">type</span> { <span class="ty">SignAndExecuteTransaction</span> } <span class="kw">from</span> <span class="str">"@mysten/dapp-kit"</span>;
+
+<span class="cm">/**
+ * Issue credential on-chain
+ * Dipanggil setelah Walrus upload selesai
+ */</span>
+<span class="kw">export async function</span> <span class="fn">issueCredentialTx</span>(
+  <span class="prop">params</span>: {
+    <span class="prop">issuerCapId</span>: <span class="ty">string</span>;
+    <span class="prop">walrusBlobId</span>: <span class="ty">string</span>;
+    <span class="prop">walrusMetadataBlobId</span>: <span class="ty">string</span>;
+    <span class="prop">documentHash</span>: <span class="ty">Uint8Array</span>;
+    <span class="prop">credentialType</span>: <span class="ty">string</span>;
+    <span class="prop">title</span>: <span class="ty">string</span>;
+    <span class="prop">recipient</span>: <span class="ty">string</span>;
+    <span class="prop">recipientName</span>: <span class="ty">string</span>;
+    <span class="prop">expiresAt</span>: <span class="ty">number</span>; <span class="cm">// 0 = no expiry</span>
+  },
+  <span class="prop">signAndExecute</span>: <span class="ty">SignAndExecuteTransaction</span>
+) {
+  <span class="kw">const</span> <span class="prop">tx</span> = <span class="kw">new</span> <span class="fn">Transaction</span>();
+
+  <span class="prop">tx</span>.<span class="fn">moveCall</span>({
+    <span class="prop">target</span>: <span class="str">`</span><span class="prop">${CONTRACT.packageId}</span><span class="str">::</span><span class="prop">${CONTRACT.credentialModule}</span><span class="str">::issue_credential`</span>,
+    <span class="prop">arguments</span>: [
+      <span class="prop">tx</span>.<span class="fn">object</span>(<span class="prop">params</span>.<span class="prop">issuerCapId</span>),
+      <span class="prop">tx</span>.<span class="fn">pure</span>.<span class="fn">vector</span>(<span class="str">"u8"</span>, <span class="kw">new</span> <span class="fn">TextEncoder</span>().<span class="fn">encode</span>(<span class="prop">params</span>.<span class="prop">walrusBlobId</span>)),
+      <span class="prop">tx</span>.<span class="fn">pure</span>.<span class="fn">vector</span>(<span class="str">"u8"</span>, <span class="kw">new</span> <span class="fn">TextEncoder</span>().<span class="fn">encode</span>(<span class="prop">params</span>.<span class="prop">walrusMetadataBlobId</span>)),
+      <span class="prop">tx</span>.<span class="fn">pure</span>.<span class="fn">vector</span>(<span class="str">"u8"</span>, <span class="prop">params</span>.<span class="prop">documentHash</span>),
+      <span class="prop">tx</span>.<span class="fn">pure</span>.<span class="fn">vector</span>(<span class="str">"u8"</span>, <span class="kw">new</span> <span class="fn">TextEncoder</span>().<span class="fn">encode</span>(<span class="prop">params</span>.<span class="prop">credentialType</span>)),
+      <span class="prop">tx</span>.<span class="fn">pure</span>.<span class="fn">vector</span>(<span class="str">"u8"</span>, <span class="kw">new</span> <span class="fn">TextEncoder</span>().<span class="fn">encode</span>(<span class="prop">params</span>.<span class="prop">title</span>)),
+      <span class="prop">tx</span>.<span class="fn">pure</span>.<span class="fn">address</span>(<span class="prop">params</span>.<span class="prop">recipient</span>),
+      <span class="prop">tx</span>.<span class="fn">pure</span>.<span class="fn">vector</span>(<span class="str">"u8"</span>, <span class="kw">new</span> <span class="fn">TextEncoder</span>().<span class="fn">encode</span>(<span class="prop">params</span>.<span class="prop">recipientName</span>)),
+      <span class="prop">tx</span>.<span class="fn">pure</span>.<span class="fn">u64</span>(<span class="prop">params</span>.<span class="prop">expiresAt</span>),
+      <span class="prop">tx</span>.<span class="fn">object</span>(<span class="str">"0x6"</span>), <span class="cm">// Sui Clock object (always 0x6)</span>
+    ],
+  });
+
+  <span class="kw">return</span> <span class="fn">signAndExecute</span>({ <span class="prop">transaction</span>: <span class="prop">tx</span> });
+}
+
+<span class="cm">/**
+ * Query credential object dari SUI via Tatum RPC
+ */</span>
+<span class="kw">export async function</span> <span class="fn">getCredential</span>(<span class="prop">credentialObjectId</span>: <span class="ty">string</span>) {
+  <span class="kw">return</span> <span class="prop">suiClient</span>.<span class="fn">getObject</span>({
+    <span class="prop">id</span>: <span class="prop">credentialObjectId</span>,
+    <span class="prop">options</span>: {
+      <span class="prop">showContent</span>: <span class="kw">true</span>,
+      <span class="prop">showOwner</span>: <span class="kw">true</span>,
+      <span class="prop">showType</span>: <span class="kw">true</span>,
+    },
+  });
+}
+
+<span class="cm">/**
+ * Get semua credential milik wallet address tertentu
+ */</span>
+<span class="kw">export async function</span> <span class="fn">getWalletCredentials</span>(<span class="prop">walletAddress</span>: <span class="ty">string</span>) {
+  <span class="kw">const</span> <span class="prop">objects</span> = <span class="kw">await</span> <span class="prop">suiClient</span>.<span class="fn">getOwnedObjects</span>({
+    <span class="prop">owner</span>: <span class="prop">walletAddress</span>,
+    <span class="prop">filter</span>: {
+      <span class="prop">StructType</span>: <span class="str">`</span><span class="prop">${CONTRACT.packageId}</span><span class="str">::credential::Credential`</span>,
+    },
+    <span class="prop">options</span>: { <span class="prop">showContent</span>: <span class="kw">true</span>, <span class="prop">showType</span>: <span class="kw">true</span> },
+  });
+  <span class="kw">return</span> <span class="prop">objects</span>.<span class="prop">data</span>;
+}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 7: FRONTEND ==================== -->
+<section class="section" id="frontend">
+  <div class="container">
+    <div class="section-label" data-num="07">FRONTEND PAGES</div>
+    <h2 class="section-title">Frontend — 3 Core Pages</h2>
+    <p class="section-desc">Tiga halaman utama yang harus dibangun. Prioritaskan Verifier Page karena ini yang paling sering di-demo ke juri.</p>
+
+    <div class="grid-3" style="margin-bottom: 2rem;">
+      <div class="card card-green">
+        <div class="arch-label" style="text-align:left; color: var(--green); font-size: 10px; margin-bottom: 6px;">PRIORITY 1</div>
+        <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">Verifier Page</div>
+        <p style="font-size: 13px;">Input credential ID / wallet address → instant verification result + preview dokumen dari Walrus. Zero login needed.</p>
+        <code style="font-size: 11px;">/verify/[credentialId]</code>
+      </div>
+      <div class="card card-blue">
+        <div class="arch-label" style="text-align:left; color: var(--blue); font-size: 10px; margin-bottom: 6px;">PRIORITY 2</div>
+        <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">Issuer Dashboard</div>
+        <p style="font-size: 13px;">Connect wallet → upload dokumen ke Walrus → fill form → issue credential on-chain via Tatum RPC.</p>
+        <code style="font-size: 11px;">/issue</code>
+      </div>
+      <div class="card">
+        <div class="arch-label" style="text-align:left; color: var(--amber); font-size: 10px; margin-bottom: 6px;">PRIORITY 3</div>
+        <div style="font-weight: 600; font-size: 15px; margin-bottom: 6px;">Holder Wallet</div>
+        <p style="font-size: 13px;">Connect wallet → lihat semua credential → copy share link → share ke employer.</p>
+        <code style="font-size: 11px;">/wallet</code>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">app/app/verify/[id]/page.tsx</span>
+        <span class="code-desc">Verifier page — paling penting untuk demo</span>
+      </div>
+      <div class="code-block">
+<span class="str">"use client"</span>;
+<span class="kw">import</span> { <span class="ty">useEffect</span>, <span class="ty">useState</span> } <span class="kw">from</span> <span class="str">"react"</span>;
+<span class="kw">import</span> { <span class="fn">getCredential</span> } <span class="kw">from</span> <span class="str">"@/lib/contract"</span>;
+<span class="kw">import</span> { <span class="fn">fetchMetadataFromWalrus</span>, <span class="fn">fetchFromWalrus</span> } <span class="kw">from</span> <span class="str">"@/lib/walrus"</span>;
+
+<span class="kw">type</span> <span class="ty">VerifyStatus</span> = <span class="str">"loading"</span> | <span class="str">"valid"</span> | <span class="str">"revoked"</span> | <span class="str">"expired"</span> | <span class="str">"not_found"</span>;
+
+<span class="kw">export default function</span> <span class="fn">VerifyPage</span>({ <span class="prop">params</span> }: { <span class="prop">params</span>: { <span class="prop">id</span>: <span class="ty">string</span> } }) {
+  <span class="kw">const</span> [<span class="prop">status</span>, <span class="fn">setStatus</span>] = <span class="fn">useState</span>&lt;<span class="ty">VerifyStatus</span>&gt;(<span class="str">"loading"</span>);
+  <span class="kw">const</span> [<span class="prop">credential</span>, <span class="fn">setCredential</span>] = <span class="fn">useState</span>&lt;<span class="kw">any</span>&gt;(<span class="kw">null</span>);
+  <span class="kw">const</span> [<span class="prop">metadata</span>, <span class="fn">setMetadata</span>] = <span class="fn">useState</span>&lt;<span class="kw">any</span>&gt;(<span class="kw">null</span>);
+  <span class="kw">const</span> [<span class="prop">docUrl</span>, <span class="fn">setDocUrl</span>] = <span class="fn">useState</span>&lt;<span class="ty">string</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+  <span class="fn">useEffect</span>(<span class="kw">async</span> () => {
+    <span class="kw">try</span> {
+      <span class="cm">// 1. Query credential on-chain via Tatum RPC</span>
+      <span class="kw">const</span> <span class="prop">obj</span> = <span class="kw">await</span> <span class="fn">getCredential</span>(<span class="prop">params</span>.<span class="prop">id</span>);
+      <span class="kw">if</span> (!<span class="prop">obj</span>.<span class="prop">data</span>) { <span class="fn">setStatus</span>(<span class="str">"not_found"</span>); <span class="kw">return</span>; }
+
+      <span class="kw">const</span> <span class="prop">fields</span> = (<span class="prop">obj</span>.<span class="prop">data</span>.<span class="prop">content</span> <span class="kw">as</span> <span class="kw">any</span>).<span class="prop">fields</span>;
+      <span class="fn">setCredential</span>(<span class="prop">fields</span>);
+
+      <span class="cm">// 2. Check validity</span>
+      <span class="kw">if</span> (!<span class="prop">fields</span>.<span class="prop">is_valid</span>) { <span class="fn">setStatus</span>(<span class="str">"revoked"</span>); <span class="kw">return</span>; }
+      <span class="kw">const</span> <span class="prop">now</span> = <span class="fn">Date</span>.<span class="fn">now</span>();
+      <span class="kw">if</span> (<span class="prop">fields</span>.<span class="prop">expires_at</span> > <span class="num">0</span> && <span class="prop">now</span> > <span class="fn">Number</span>(<span class="prop">fields</span>.<span class="prop">expires_at</span>)) {
+        <span class="fn">setStatus</span>(<span class="str">"expired"</span>); <span class="kw">return</span>;
+      }
+
+      <span class="cm">// 3. Fetch metadata dari Walrus</span>
+      <span class="kw">const</span> <span class="prop">meta</span> = <span class="kw">await</span> <span class="fn">fetchMetadataFromWalrus</span>(<span class="prop">fields</span>.<span class="prop">walrus_metadata_blob_id</span>);
+      <span class="fn">setMetadata</span>(<span class="prop">meta</span>);
+
+      <span class="cm">// 4. Fetch dokumen asli dari Walrus (PDF/image)</span>
+      <span class="kw">const</span> <span class="prop">docBlob</span> = <span class="kw">await</span> <span class="fn">fetchFromWalrus</span>(<span class="prop">fields</span>.<span class="prop">walrus_blob_id</span>);
+      <span class="fn">setDocUrl</span>(<span class="fn">URL</span>.<span class="fn">createObjectURL</span>(<span class="prop">docBlob</span>));
+      <span class="fn">setStatus</span>(<span class="str">"valid"</span>);
+    } <span class="kw">catch</span> {
+      <span class="fn">setStatus</span>(<span class="str">"not_found"</span>);
+    }
+  }, [<span class="prop">params</span>.<span class="prop">id</span>]);
+
+  <span class="kw">return</span> (
+    &lt;<span class="fn">div</span> <span class="prop">className</span>=<span class="str">"max-w-2xl mx-auto p-6"</span>&gt;
+      {<span class="prop">status</span> === <span class="str">"loading"</span> && &lt;<span class="fn">VerifyLoading</span> /&gt;}
+      {<span class="prop">status</span> === <span class="str">"valid"</span> && &lt;<span class="fn">VerifySuccess</span> <span class="prop">credential</span>={<span class="prop">credential</span>} <span class="prop">metadata</span>={<span class="prop">metadata</span>} <span class="prop">docUrl</span>={<span class="prop">docUrl</span>} /&gt;}
+      {<span class="prop">status</span> === <span class="str">"revoked"</span> && &lt;<span class="fn">VerifyRevoked</span> <span class="prop">credential</span>={<span class="prop">credential</span>} /&gt;}
+      {<span class="prop">status</span> === <span class="str">"expired"</span> && &lt;<span class="fn">VerifyExpired</span> <span class="prop">credential</span>={<span class="prop">credential</span>} /&gt;}
+      {<span class="prop">status</span> === <span class="str">"not_found"</span> && &lt;<span class="fn">VerifyNotFound</span> /&gt;}
+    &lt;/<span class="fn">div</span>&gt;
+  );
+}
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">app/.env.local</span>
+        <span class="code-desc">Environment variables yang diperlukan</span>
+      </div>
+      <div class="code-block">
+<span class="cm"># Tatum API Key — dari dashboard.tatum.io</span>
+<span class="prop">TATUM_API_KEY</span>=<span class="str">your_tatum_api_key_here</span>
+
+<span class="cm"># SUI Smart Contract (setelah deploy)</span>
+<span class="prop">NEXT_PUBLIC_PACKAGE_ID</span>=<span class="str">0x...</span>
+<span class="prop">NEXT_PUBLIC_NETWORK</span>=<span class="str">mainnet</span>
+
+<span class="cm"># Walrus (tidak perlu API key untuk public endpoints)</span>
+<span class="prop">NEXT_PUBLIC_WALRUS_PUBLISHER</span>=<span class="str">https://publisher.walrus-mainnet.walrus.space</span>
+<span class="prop">NEXT_PUBLIC_WALRUS_AGGREGATOR</span>=<span class="str">https://aggregator.walrus-mainnet.walrus.space</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 8: BACKEND API ==================== -->
+<section class="section" id="api">
+  <div class="container">
+    <div class="section-label" data-num="08">BACKEND API ROUTES</div>
+    <h2 class="section-title">API Routes (Next.js)</h2>
+    <p class="section-desc">Tiga API route yang menjadi backbone WalTrust. Upload endpoint khususnya kritis karena ini yang handle Walrus integration.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <span class="code-file">app/app/api/upload/route.ts</span>
+        <span class="code-desc">Upload dokumen ke Walrus — server-side untuk keamanan</span>
+      </div>
+      <div class="code-block">
+<span class="cm">// app/app/api/upload/route.ts</span>
+<span class="kw">import</span> { <span class="ty">NextRequest</span>, <span class="ty">NextResponse</span> } <span class="kw">from</span> <span class="str">"next/server"</span>;
+<span class="kw">import</span> { <span class="fn">uploadToWalrus</span>, <span class="fn">uploadMetadataToWalrus</span>, <span class="fn">hashFile</span> } <span class="kw">from</span> <span class="str">"@/lib/walrus"</span>;
+
+<span class="kw">export async function</span> <span class="fn">POST</span>(<span class="prop">req</span>: <span class="ty">NextRequest</span>) {
+  <span class="kw">try</span> {
+    <span class="kw">const</span> <span class="prop">formData</span> = <span class="kw">await</span> <span class="prop">req</span>.<span class="fn">formData</span>();
+    <span class="kw">const</span> <span class="prop">file</span> = <span class="prop">formData</span>.<span class="fn">get</span>(<span class="str">"document"</span>) <span class="kw">as</span> <span class="ty">File</span>;
+    <span class="kw">const</span> <span class="prop">metadataStr</span> = <span class="prop">formData</span>.<span class="fn">get</span>(<span class="str">"metadata"</span>) <span class="kw">as</span> <span class="ty">string</span>;
+
+    <span class="kw">if</span> (!<span class="prop">file</span>) {
+      <span class="kw">return</span> <span class="ty">NextResponse</span>.<span class="fn">json</span>({ <span class="prop">error</span>: <span class="str">"No file"</span> }, { <span class="prop">status</span>: <span class="num">400</span> });
+    }
+
+    <span class="cm">// Validasi file type</span>
+    <span class="kw">const</span> <span class="prop">allowedTypes</span> = [<span class="str">"application/pdf"</span>, <span class="str">"image/jpeg"</span>, <span class="str">"image/png"</span>];
+    <span class="kw">if</span> (!<span class="prop">allowedTypes</span>.<span class="fn">includes</span>(<span class="prop">file</span>.<span class="prop">type</span>)) {
+      <span class="kw">return</span> <span class="ty">NextResponse</span>.<span class="fn">json</span>({ <span class="prop">error</span>: <span class="str">"Invalid file type"</span> }, { <span class="prop">status</span>: <span class="num">400</span> });
+    }
+
+    <span class="cm">// Max 10MB</span>
+    <span class="kw">if</span> (<span class="prop">file</span>.<span class="prop">size</span> > <span class="num">10</span> * <span class="num">1024</span> * <span class="num">1024</span>) {
+      <span class="kw">return</span> <span class="ty">NextResponse</span>.<span class="fn">json</span>({ <span class="prop">error</span>: <span class="str">"File too large (max 10MB)"</span> }, { <span class="prop">status</span>: <span class="num">400</span> });
+    }
+
+    <span class="kw">const</span> <span class="prop">fileBuffer</span> = <span class="kw">await</span> <span class="prop">file</span>.<span class="fn">arrayBuffer</span>();
+    <span class="kw">const</span> <span class="prop">fileBytes</span> = <span class="kw">new</span> <span class="fn">Uint8Array</span>(<span class="prop">fileBuffer</span>);
+
+    <span class="cm">// Upload dokumen asli + metadata ke Walrus secara paralel</span>
+    <span class="kw">const</span> [<span class="prop">docResult</span>, <span class="prop">metaResult</span>, <span class="prop">hash</span>] = <span class="kw">await</span> <span class="fn">Promise</span>.<span class="fn">all</span>([
+      <span class="fn">uploadToWalrus</span>(<span class="prop">fileBytes</span>, <span class="prop">file</span>.<span class="prop">type</span>),
+      <span class="fn">uploadMetadataToWalrus</span>(<span class="fn">JSON</span>.<span class="fn">parse</span>(<span class="prop">metadataStr</span>)),
+      <span class="fn">hashFile</span>(<span class="prop">fileBuffer</span>),
+    ]);
+
+    <span class="kw">return</span> <span class="ty">NextResponse</span>.<span class="fn">json</span>({
+      <span class="prop">documentBlobId</span>: <span class="prop">docResult</span>.<span class="prop">blobId</span>,
+      <span class="prop">metadataBlobId</span>: <span class="prop">metaResult</span>.<span class="prop">blobId</span>,
+      <span class="prop">documentHash</span>: <span class="fn">Array</span>.<span class="fn">from</span>(<span class="prop">hash</span>),
+      <span class="prop">docEndEpoch</span>: <span class="prop">docResult</span>.<span class="prop">endEpoch</span>,
+    });
+  } <span class="kw">catch</span> (<span class="prop">err</span>) {
+    <span class="prop">console</span>.<span class="fn">error</span>(<span class="str">"Upload error:"</span>, <span class="prop">err</span>);
+    <span class="kw">return</span> <span class="ty">NextResponse</span>.<span class="fn">json</span>({ <span class="prop">error</span>: <span class="str">"Upload failed"</span> }, { <span class="prop">status</span>: <span class="num">500</span> });
+  }
+}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 9: ROADMAP ==================== -->
+<section class="section" id="roadmap">
+  <div class="container">
+    <div class="section-label" data-num="09">6-DAY BUILD ROADMAP</div>
+    <h2 class="section-title">Roadmap harian — sprint to juara</h2>
+    <p class="section-desc">Timeline eksekusi 6 hari menuju deadline 6 Juni 2026. Setiap hari ada deliverable yang jelas.</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-day">DAY 1 — TODAY (26 MEI)</div>
+        <div class="tl-title">Foundation Setup & Smart Contract</div>
+        <ul class="tl-tasks">
+          <li>Setup repo monorepo (contracts/ + app/)</li>
+          <li>Install Sui CLI, setup wallet mainnet, get WAL token untuk storage</li>
+          <li>Tulis credential.move + issuer.move (copy dari blueprint ini)</li>
+          <li>Run <code>sui move test</code> — semua harus pass</li>
+          <li>Deploy ke Testnet dulu, catat Package ID</li>
+          <li>Setup Next.js 14 project + install @mysten/sui @mysten/dapp-kit</li>
+          <li>Buat .env.local dengan Tatum API key</li>
+          <li><strong>EOD deliverable:</strong> Smart contract ter-deploy di testnet, Next.js boilerplate jalan</li>
+        </ul>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 2 (27 MEI)</div>
+        <div class="tl-title">Walrus Integration + API Routes</div>
+        <ul class="tl-tasks">
+          <li>Implement walrus.ts (upload + fetch functions)</li>
+          <li>Implement sui-client.ts (Tatum RPC config)</li>
+          <li>Buat API route /api/upload — test dengan Postman/curl</li>
+          <li>Test upload PDF ke Walrus testnet, verify blob bisa di-fetch</li>
+          <li>Implement contract.ts (issueCredentialTx, getCredential)</li>
+          <li><strong>EOD deliverable:</strong> Bisa upload file ke Walrus + catat Blob ID</li>
+        </ul>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 3 (28 MEI)</div>
+        <div class="tl-title">Issuer Dashboard (Frontend)</div>
+        <ul class="tl-tasks">
+          <li>Buat /issue page dengan Sui wallet connection</li>
+          <li>Form: credential type, title, recipient address, expiry</li>
+          <li>File upload dengan preview (PDF + image support)</li>
+          <li>Integrasi full flow: upload ke Walrus → issue on-chain via Tatum RPC</li>
+          <li>Success state: tampilkan credential ID + SuiScan link</li>
+          <li><strong>EOD deliverable:</strong> Issue credential end-to-end di testnet</li>
+        </ul>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 4 (29 MEI)</div>
+        <div class="tl-title">Verifier Page + Holder Wallet</div>
+        <ul class="tl-tasks">
+          <li>Buat /verify/[id] page (PRIORITAS UTAMA)</li>
+          <li>Fetch credential from Tatum RPC → tampilkan status</li>
+          <li>Fetch metadata + dokumen dari Walrus → PDF viewer</li>
+          <li>Status indicators: VALID ✓ / REVOKED ✗ / EXPIRED ⚠</li>
+          <li>Buat /wallet page — tampilkan semua credential milik wallet</li>
+          <li>Share credential link (copy to clipboard)</li>
+          <li><strong>EOD deliverable:</strong> Full flow verifikasi berjalan</li>
+        </ul>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 5 (30 MEI)</div>
+        <div class="tl-title">Deploy Mainnet + Polish UI</div>
+        <ul class="tl-tasks">
+          <li>Deploy smart contract ke Sui MAINNET</li>
+          <li>Update .env dengan mainnet Package ID</li>
+          <li>Deploy app ke Vercel (gratis, instant)</li>
+          <li>Polish UI: tambah animasi, loading states, error states</li>
+          <li>Test full flow di mainnet</li>
+          <li>Issue beberapa credential sample untuk demo</li>
+          <li><strong>EOD deliverable:</strong> Live app di mainnet + Vercel URL</li>
+        </ul>
+      </div>
+      <div class="tl-item">
+        <div class="tl-day">DAY 6 (31 MEI — 5 JUN)</div>
+        <div class="tl-title">README + Demo Video + Submission</div>
+        <ul class="tl-tasks">
+          <li>Tulis README.md lengkap (architecture, setup guide, demo)</li>
+          <li>Record demo video 2-3 menit (script ada di section 10)</li>
+          <li>Post di X dan LinkedIn tagging @Tatum_io @WalrusFoundation @SuiNetwork</li>
+          <li>Submit via Google Form sebelum 6 Juni 17:00 UTC</li>
+          <li><strong>Buffer:</strong> 31 Mei - 5 Juni untuk polish dan contingency</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SECTION 10: DEMO ==================== -->
+<section class="section" id="demo">
+  <div class="container">
+    <div class="section-label" data-num="10">DEMO STRATEGY</div>
+    <h2 class="section-title">Demo video script & README</h2>
+    <p class="section-desc">Presentation adalah 20% dari score. Demo video 2-3 menit yang tepat bisa membedakan proyek yang sama secara teknis.</p>
+
+    <div class="callout callout-green">
+      <span class="callout-icon">🎬</span>
+      <div class="callout-text">
+        <strong>Golden rule demo video:</strong> Tunjukkan MASALAH dulu (10 detik), lalu SOLUSI (sisanya). Juri menilai ratusan submission — tangkap perhatian mereka di 5 detik pertama.
+      </div>
+    </div>
+
+    <div class="card" style="margin: 1.5rem 0;">
+      <h4 style="margin-top:0; color: var(--green); font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em;">VIDEO SCRIPT (2 MENIT 30 DETIK)</h4>
+      <div class="timeline" style="margin-top: 1rem;">
+        <div class="tl-item">
+          <div class="tl-day">0:00 – 0:10 | HOOK</div>
+          <div class="tl-title" style="font-size: 14px;">Tampilkan ijazah palsu yang mudah dibuat</div>
+          <ul class="tl-tasks">
+            <li>"How do you know if a credential is real? Today, you can't. WalTrust changes that."</li>
+          </ul>
+        </div>
+        <div class="tl-item">
+          <div class="tl-day">0:10 – 0:35 | ISSUER FLOW</div>
+          <div class="tl-title" style="font-size: 14px;">Universitas issue credential</div>
+          <ul class="tl-tasks">
+            <li>Connect wallet → upload PDF ijazah</li>
+            <li>"File is being uploaded to Walrus — decentralized storage on SUI"</li>
+            <li>Fill form → click Issue → sign transaction via Tatum RPC</li>
+            <li>Tampilkan tx di SuiScan (mainnet)</li>
+          </ul>
+        </div>
+        <div class="tl-item">
+          <div class="tl-day">0:35 – 1:10 | VERIFIER FLOW</div>
+          <div class="tl-title" style="font-size: 14px;">Employer verifikasi dalam 3 detik</div>
+          <ul class="tl-tasks">
+            <li>Paste credential ID ke verifier page</li>
+            <li>Tunjukkan loading → VALID ✓ muncul</li>
+            <li>"Data fetched from SUI via Tatum RPC"</li>
+            <li>"Document retrieved from Walrus — decentralized, tamper-proof"</li>
+            <li>Tampilkan PDF dokumen asli di browser</li>
+          </ul>
+        </div>
+        <div class="tl-item">
+          <div class="tl-day">1:10 – 1:40 | REVOCATION</div>
+          <div class="tl-title" style="font-size: 14px;">Revoke credential jika perlu</div>
+          <ul class="tl-tasks">
+            <li>Issuer click Revoke → 1 transaction</li>
+            <li>Kembali ke verifier page → REVOKED ✗</li>
+            <li>"One transaction. Instant. No admin needed."</li>
+          </ul>
+        </div>
+        <div class="tl-item">
+          <div class="tl-day">1:40 – 2:30 | TECH STACK + CLOSE</div>
+          <div class="tl-title" style="font-size: 14px;">Tunjukkan architecture + impact</div>
+          <ul class="tl-tasks">
+            <li>Architecture diagram: SUI Move contract + Walrus + Tatum RPC</li>
+            <li>"All on-chain calls powered by Tatum's enterprise RPC"</li>
+            <li>"Documents stored on Walrus — not IPFS, not S3. Truly decentralized."</li>
+            <li>GitHub link + live demo URL</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h3>README Template Structure</h3>
+    <div class="code-wrap">
+      <div class="code-block">
+<span class="cm"># WalTrust — Decentralized Credential Verification</span>
+
+<span class="cm">## 🏆 Tatum × Walrus Hackathon Submission</span>
+
+<span class="cm">### What is WalTrust?</span>
+WalTrust is a trustless credential verification system built on SUI.
+Documents live on Walrus. Attestations live on-chain. Verification takes 3 seconds.
+
+<span class="cm">### Architecture</span>
+[Diagram goes here — use draw.io atau Mermaid]
+
+SUI Move Contract → stores: credential metadata, blob IDs, validity status
+Walrus Storage   → stores: original PDF/image document + metadata JSON
+Tatum RPC        → powers: ALL on-chain queries and transaction execution
+Next.js Frontend → provides: issue, verify, and wallet management UI
+
+<span class="cm">### Tech Stack</span>
+- Smart Contract: Sui Move (SUI Mainnet)
+- Storage: Walrus (Mainnet)  ← CORE, not add-on
+- RPC: Tatum (sui-mainnet.gateway.tatum.io)  ← ALL calls
+- Frontend: Next.js 14 + TypeScript + @mysten/dapp-kit
+- Hosting: Vercel
+
+<span class="cm">### Live Demo</span>
+🌐 https://waltrust.vercel.app
+📦 Package ID: 0x[mainnet_package_id]
+🔍 SuiScan: https://suiscan.xyz/mainnet/object/[package_id]
+
+<span class="cm">### How to Run</span>
+1. git clone https://github.com/[you]/waltrust
+2. cd app && cp .env.example .env.local
+3. Fill in TATUM_API_KEY from dashboard.tatum.io
+4. npm install && npm run dev
+
+<span class="cm">### Walrus Integration Details</span>
+Every credential stores TWO Walrus blobs:
+- walrus_blob_id: The actual document (PDF/image)
+- walrus_metadata_blob_id: JSON metadata for quick display
+Both Blob IDs are stored on-chain in the SUI Move object.
+Revocation: 1 on-chain tx. No Walrus update needed — blob stays, chain says REVOKED.
+      </div>
+    </div>
+
+    <h3>Checklist final sebelum submit</h3>
+    <div class="grid-2" style="margin-top: 0.75rem;">
+      <div class="card card-green">
+        <h4 style="margin-top:0;">Technical ✓</h4>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span> Deploy ke SUI MAINNET (bukan testnet)</li>
+          <li><span class="check-icon">✓</span> Semua RPC via Tatum endpoint + API key</li>
+          <li><span class="check-icon">✓</span> Walrus storage untuk dokumen + metadata</li>
+          <li><span class="check-icon">✓</span> Revocation flow berfungsi</li>
+          <li><span class="check-icon">✓</span> Live demo URL (Vercel)</li>
+          <li><span class="check-icon">✓</span> GitHub repo public + MIT license</li>
+          <li><span class="check-icon">✓</span> <code>sui move test</code> semua pass</li>
+        </ul>
+      </div>
+      <div class="card card-amber">
+        <h4 style="margin-top:0;">Submission ✓</h4>
+        <ul class="checklist">
+          <li><span class="check-icon">✓</span> GitHub repo dengan README lengkap</li>
+          <li><span class="check-icon">✓</span> Demo video 2-3 menit (YouTube/Loom)</li>
+          <li><span class="check-icon">✓</span> Submit via Google Form sebelum 6 Jun 17:00 UTC</li>
+          <li><span class="check-icon">✓</span> Post X tagging @Tatum_io @WalrusFoundation @SuiNetwork</li>
+          <li><span class="check-icon">✓</span> Post LinkedIn (sama)</li>
+          <li><span class="check-icon">✓</span> Screenshot SuiScan untuk mainnet proof</li>
+          <li><span class="check-icon">✓</span> Include sample credential ID di README</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <p>WalTrust Hackathon Blueprint · Tatum × Walrus Hackathon 2026 · Build fast, store trustlessly.</p>
+    <p style="margin-top: 4px;">Stack: SUI Move · Walrus · Tatum RPC · Next.js 14 · TypeScript</p>
+  </div>
+</footer>
+
+</body>
+</html>
