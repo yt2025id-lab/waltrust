@@ -144,7 +144,11 @@ module waltrust::credential {
             issuer_name: string::utf8(issuer_name),
             is_active: true,
         };
-        vec_map::insert(&mut registry.issuers, issuer_address, true);
+        if (vec_map::contains(&registry.issuers, &issuer_address)) {
+            *vec_map::get_mut(&mut registry.issuers, &issuer_address) = true;
+        } else {
+            vec_map::insert(&mut registry.issuers, issuer_address, true);
+        };
         event::emit(IssuerApproved {
             issuer: issuer_address,
             issuer_name: cap.issuer_name,
@@ -161,7 +165,7 @@ module waltrust::credential {
         ctx: &mut TxContext,
     ) {
         issuer_cap.is_active = false;
-        vec_map::insert(&mut registry.issuers, issuer_cap.issuer_address, false);
+        *vec_map::get_mut(&mut registry.issuers, &issuer_cap.issuer_address) = false;
         event::emit(IssuerDeactivated {
             issuer: issuer_cap.issuer_address,
             deactivated_by: tx_context::sender(ctx),
@@ -290,49 +294,96 @@ module waltrust::credential {
 
     #[test_only]
     use sui::test_scenario;
+    #[test_only]
+    use sui::clock;
 
-    #[test]
-    fun test_issue_credential_success() {
-        let admin = @0xAD;
-        let issuer_addr = @0x11;
-        let _recipient = @0x22;
-        let mut scenario = test_scenario::begin(admin);
-
-        test_scenario::next_tx(&mut scenario, admin);
-        { init(test_scenario::ctx(&mut scenario)); };
-
-        // approve issuer
-        test_scenario::next_tx(&mut scenario, admin);
+    // === Helper: init + approve issuer ===
+    #[test_only]
+    fun setup_issuer(
+        scenario: &mut test_scenario::Scenario,
+        admin: address,
+        issuer_addr: address,
+    ) {
+        test_scenario::next_tx(scenario, admin);
         {
-            let admin_cap = test_scenario::take_from_sender<AdminCap>(&mut scenario);
-            let mut registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            init(test_scenario::ctx(scenario));
+            let test_clock = clock::create_for_testing(test_scenario::ctx(scenario));
+            clock::share_for_testing(test_clock);
+        };
+
+        test_scenario::next_tx(scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(scenario);
+            let mut registry = test_scenario::take_shared<IssuerRegistry>(scenario);
             approve_issuer(
                 &admin_cap,
                 &mut registry,
                 issuer_addr,
                 b"Test University",
-                test_scenario::ctx(&mut scenario),
+                test_scenario::ctx(scenario),
             );
             test_scenario::return_shared(registry);
-            test_scenario::return_to_sender(&mut scenario, admin_cap);
+            test_scenario::return_to_sender(scenario, admin_cap);
         };
+    }
 
-        // verify issuer was registered
-        test_scenario::next_tx(&mut scenario, admin);
+    // === Helper: setup + issue credential ===
+    #[test_only]
+    fun setup_and_issue(
+        scenario: &mut test_scenario::Scenario,
+        admin: address,
+        issuer_addr: address,
+        recipient: address,
+        expires_at: u64,
+    ) {
+        setup_issuer(scenario, admin, issuer_addr);
+
+        test_scenario::next_tx(scenario, issuer_addr);
         {
-            let registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
-            assert!(is_issuer_registered(&registry, issuer_addr), 0);
-            assert!(is_issuer_active(&registry, issuer_addr), 1);
-            test_scenario::return_shared(registry);
+            let cap = test_scenario::take_from_sender<IssuerCap>(scenario);
+            let clock = test_scenario::take_shared<Clock>(scenario);
+            issue_credential(
+                &cap,
+                b"walrus_blob_id_123",
+                b"metadata_blob_id_456",
+                b"document_hash_abc",
+                b"degree",
+                b"Computer Science",
+                recipient,
+                b"Alice",
+                expires_at,
+                &clock,
+                test_scenario::ctx(scenario),
+            );
+            test_scenario::return_shared(clock);
+            test_scenario::return_to_sender(scenario, cap);
         };
+    }
 
-        // issuer has cap
-        test_scenario::next_tx(&mut scenario, issuer_addr);
+    // ============ BASIC TESTS ============
+
+    #[test]
+    fun test_issue_credential_success() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, recipient);
         {
-            let _cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
-            test_scenario::return_to_sender(&mut scenario, _cap);
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            assert!(*get_title(&cred) == string::utf8(b"Computer Science"), 0);
+            assert!(*get_credential_type(&cred) == string::utf8(b"degree"), 1);
+            assert!(get_issuer(&cred) == issuer_addr, 2);
+            assert!(get_recipient(&cred) == recipient, 3);
+            assert!(get_walrus_blob_id(&cred) == &string::utf8(b"walrus_blob_id_123"), 4);
+            assert!(get_metadata_blob_id(&cred) == &string::utf8(b"metadata_blob_id_456"), 5);
+            assert!(is_valid(&cred), 6);
+            assert!(get_expires_at(&cred) == 0, 7);
+            test_scenario::return_to_sender(&mut scenario, cred);
         };
-
         test_scenario::end(scenario);
     }
 
@@ -345,7 +396,6 @@ module waltrust::credential {
         test_scenario::next_tx(&mut scenario, admin);
         { init(test_scenario::ctx(&mut scenario)); };
 
-        // not registered initially
         test_scenario::next_tx(&mut scenario, admin);
         {
             let registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
@@ -354,6 +404,469 @@ module waltrust::credential {
             test_scenario::return_shared(registry);
         };
 
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(&mut scenario);
+            let mut registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            approve_issuer(&admin_cap, &mut registry, issuer_addr, b"University", test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(registry);
+            test_scenario::return_to_sender(&mut scenario, admin_cap);
+        };
+
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            assert!(is_issuer_registered(&registry, issuer_addr), 2);
+            assert!(is_issuer_active(&registry, issuer_addr), 3);
+            test_scenario::return_shared(registry);
+        };
+        test_scenario::end(scenario);
+    }
+
+    // ============ REVOCATION TESTS ============
+
+    #[test]
+    fun test_revoke_credential_success() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, issuer_addr);
+        };
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            let mut cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            revoke_credential(&cap, &mut cred, &clock, test_scenario::ctx(&mut scenario));
+            assert!(!is_valid(&cred), 0);
+            test_scenario::return_shared(clock);
+            transfer::public_transfer(cred, recipient);
+            test_scenario::return_to_sender(&mut scenario, cap);
+        };
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            assert!(!is_valid(&cred), 1);
+            test_scenario::return_to_sender(&mut scenario, cred);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = EAlreadyRevoked)]
+    fun test_revoke_already_revoked_fails() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, issuer_addr);
+        };
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            let mut cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            revoke_credential(&cap, &mut cred, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(clock);
+            transfer::public_transfer(cred, issuer_addr);
+            test_scenario::return_to_sender(&mut scenario, cap);
+        };
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            let mut cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            revoke_credential(&cap, &mut cred, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(clock);
+            transfer::public_transfer(cred, issuer_addr);
+            test_scenario::return_to_sender(&mut scenario, cap);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = ENotCredentialIssuer)]
+    fun test_revoke_by_wrong_issuer_fails() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let wrong_issuer = @0x33;
+        let recipient = @0x22;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(&mut scenario);
+            let mut registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            approve_issuer(&admin_cap, &mut registry, wrong_issuer, b"Fake University", test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(registry);
+            test_scenario::return_to_sender(&mut scenario, admin_cap);
+        };
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, wrong_issuer);
+        };
+
+        test_scenario::next_tx(&mut scenario, wrong_issuer);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            let mut cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            revoke_credential(&cap, &mut cred, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(clock);
+            transfer::public_transfer(cred, wrong_issuer);
+            test_scenario::return_to_sender(&mut scenario, cap);
+        };
+        test_scenario::end(scenario);
+    }
+
+    // ============ VERIFICATION TESTS ============
+
+    #[test]
+    fun test_verify_valid_credential() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let verifier = @0x44;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, verifier);
+        };
+
+        test_scenario::next_tx(&mut scenario, verifier);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            let result = verify_credential(&cred, &clock, test_scenario::ctx(&mut scenario));
+            assert!(result, 0);
+            assert!(is_valid(&cred), 1);
+            assert!(!is_expired(&cred, &clock), 2);
+            test_scenario::return_shared(clock);
+            test_scenario::return_to_sender(&mut scenario, cred);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_verify_revoked_credential() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let verifier = @0x44;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, issuer_addr);
+        };
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            let mut cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            revoke_credential(&cap, &mut cred, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(clock);
+            transfer::public_transfer(cred, verifier);
+            test_scenario::return_to_sender(&mut scenario, cap);
+        };
+
+        test_scenario::next_tx(&mut scenario, verifier);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            let result = verify_credential(&cred, &clock, test_scenario::ctx(&mut scenario));
+            assert!(!result, 0);
+            assert!(!is_valid(&cred), 1);
+            test_scenario::return_shared(clock);
+            test_scenario::return_to_sender(&mut scenario, cred);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_verify_expired_credential() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let verifier = @0x44;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 1);
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, verifier);
+        };
+
+        test_scenario::next_tx(&mut scenario, verifier);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let mut clock = test_scenario::take_shared<Clock>(&mut scenario);
+            clock::set_for_testing(&mut clock, 9999);
+            let result = verify_credential(&cred, &clock, test_scenario::ctx(&mut scenario));
+            assert!(!result, 0);
+            assert!(is_expired(&cred, &clock), 1);
+            test_scenario::return_shared(clock);
+            test_scenario::return_to_sender(&mut scenario, cred);
+        };
+        test_scenario::end(scenario);
+    }
+
+    // ============ ISSUER MANAGEMENT TESTS ============
+
+    #[test]
+    #[expected_failure(abort_code = EIssuerNotActive)]
+    fun test_issue_by_inactive_issuer_fails() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_issuer(&mut scenario, admin, issuer_addr);
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            transfer::public_transfer(cap, admin);
+        };
+
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(&mut scenario);
+            let mut registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            let mut cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            deactivate_issuer(&admin_cap, &mut registry, &mut cap, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(registry);
+            test_scenario::return_to_sender(&mut scenario, admin_cap);
+            transfer::public_transfer(cap, issuer_addr);
+        };
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            issue_credential(&cap, b"blob", b"meta", b"hash", b"degree", b"Title", recipient, b"Name", 0, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(clock);
+            test_scenario::return_to_sender(&mut scenario, cap);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_deactivate_reactivate_issuer() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_issuer(&mut scenario, admin, issuer_addr);
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            transfer::public_transfer(cap, admin);
+        };
+
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(&mut scenario);
+            let mut registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            let mut cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            deactivate_issuer(&admin_cap, &mut registry, &mut cap, test_scenario::ctx(&mut scenario));
+            assert!(!is_issuer_active(&registry, issuer_addr), 0);
+            assert!(!cap.is_active, 1);
+            test_scenario::return_shared(registry);
+            test_scenario::return_to_sender(&mut scenario, admin_cap);
+            transfer::public_transfer(cap, issuer_addr);
+        };
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            transfer::public_transfer(cap, admin);
+        };
+
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(&mut scenario);
+            let mut registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            approve_issuer(&admin_cap, &mut registry, issuer_addr, b"Test University", test_scenario::ctx(&mut scenario));
+            assert!(is_issuer_active(&registry, issuer_addr), 2);
+            test_scenario::return_shared(registry);
+            test_scenario::return_to_sender(&mut scenario, admin_cap);
+        };
+        test_scenario::end(scenario);
+    }
+
+    // ============ EXTRA FIELDS TESTS ============
+
+    #[test]
+    fun test_add_extra_field() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, issuer_addr);
+        };
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            let mut cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            add_extra_field(&cap, &mut cred, b"student_id", b"12345");
+            add_extra_field(&cap, &mut cred, b"gpa", b"3.8");
+            assert!(vec_map::contains(&cred.extra_fields, &string::utf8(b"student_id")), 0);
+            assert!(vec_map::contains(&cred.extra_fields, &string::utf8(b"gpa")), 1);
+            test_scenario::return_to_sender(&mut scenario, cap);
+            transfer::public_transfer(cred, recipient);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = ENotCredentialIssuer)]
+    fun test_add_extra_field_wrong_issuer_fails() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let wrong_addr = @0x33;
+        let recipient = @0x22;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(&mut scenario);
+            let mut registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            approve_issuer(&admin_cap, &mut registry, wrong_addr, b"Wrong", test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(registry);
+            test_scenario::return_to_sender(&mut scenario, admin_cap);
+        };
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, wrong_addr);
+        };
+
+        test_scenario::next_tx(&mut scenario, wrong_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            let mut cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            add_extra_field(&cap, &mut cred, b"key", b"value");
+            test_scenario::return_to_sender(&mut scenario, cap);
+            transfer::public_transfer(cred, wrong_addr);
+        };
+        test_scenario::end(scenario);
+    }
+
+    // ============ EDGE CASE TESTS ============
+
+    #[test]
+    fun test_credential_transfer() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let third_party = @0x55;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 0);
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, third_party);
+        };
+
+        test_scenario::next_tx(&mut scenario, third_party);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            assert!(get_recipient(&cred) == recipient, 0);
+            test_scenario::return_to_sender(&mut scenario, cred);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_verify_credential_not_expired() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let recipient = @0x22;
+        let verifier = @0x44;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_and_issue(&mut scenario, admin, issuer_addr, recipient, 9999999999999);
+
+        test_scenario::next_tx(&mut scenario, recipient);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            transfer::public_transfer(cred, verifier);
+        };
+
+        test_scenario::next_tx(&mut scenario, verifier);
+        {
+            let cred = test_scenario::take_from_sender<Credential>(&mut scenario);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            let result = verify_credential(&cred, &clock, test_scenario::ctx(&mut scenario));
+            assert!(result, 0);
+            assert!(!is_expired(&cred, &clock), 1);
+            test_scenario::return_shared(clock);
+            test_scenario::return_to_sender(&mut scenario, cred);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_empty_issuer_registry() {
+        let admin = @0xAD;
+        let random_addr = @0x99;
+        let mut scenario = test_scenario::begin(admin);
+
+        test_scenario::next_tx(&mut scenario, admin);
+        { init(test_scenario::ctx(&mut scenario)); };
+
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            assert!(!is_issuer_registered(&registry, random_addr), 0);
+            assert!(!is_issuer_active(&registry, random_addr), 1);
+            test_scenario::return_shared(registry);
+        };
         test_scenario::end(scenario);
     }
 }
