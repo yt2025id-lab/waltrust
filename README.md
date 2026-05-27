@@ -7,7 +7,9 @@
 </p>
 
 <div align="center">
-  <h1>𓃥 WalTrust</h1>
+  <a href="https://waltrust.vercel.app">
+    <img src="app/public/logo%20WalTrust.png" alt="WalTrust" width="280">
+  </a>
   <h3>Decentralized Credential Verification — Powered by SUI · Walrus · Tatum</h3>
   <p><strong>Verify any credential. Instantly. On-chain. Under 3 seconds.</strong></p>
 </div>
