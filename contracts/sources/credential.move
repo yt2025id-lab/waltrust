@@ -131,6 +131,7 @@ module waltrust::credential {
     // ============ ISSUER MANAGEMENT ============
 
     /// Admin approve new issuer (university, certification body)
+    /// If issuer is already registered, only re-activates without creating duplicate cap
     public fun approve_issuer(
         _admin: &AdminCap,
         registry: &mut IssuerRegistry,
@@ -138,23 +139,24 @@ module waltrust::credential {
         issuer_name: vector<u8>,
         ctx: &mut TxContext
     ) {
-        let cap = IssuerCap {
-            id: object::new(ctx),
-            issuer_address,
-            issuer_name: string::utf8(issuer_name),
-            is_active: true,
-        };
+        let name = string::utf8(issuer_name);
         if (vec_map::contains(&registry.issuers, &issuer_address)) {
             *vec_map::get_mut(&mut registry.issuers, &issuer_address) = true;
         } else {
             vec_map::insert(&mut registry.issuers, issuer_address, true);
+            let cap = IssuerCap {
+                id: object::new(ctx),
+                issuer_address,
+                issuer_name: name,
+                is_active: true,
+            };
+            transfer::transfer(cap, issuer_address);
         };
         event::emit(IssuerApproved {
             issuer: issuer_address,
-            issuer_name: cap.issuer_name,
+            issuer_name: name,
             approved_by: tx_context::sender(ctx),
         });
-        transfer::transfer(cap, issuer_address);
     }
 
     /// Admin deactivate an issuer
@@ -169,6 +171,22 @@ module waltrust::credential {
         event::emit(IssuerDeactivated {
             issuer: issuer_cap.issuer_address,
             deactivated_by: tx_context::sender(ctx),
+        });
+    }
+
+    /// Admin reactivate an existing issuer (reuses the same IssuerCap)
+    public fun reactivate_issuer(
+        _admin: &AdminCap,
+        registry: &mut IssuerRegistry,
+        issuer_cap: &mut IssuerCap,
+        ctx: &mut TxContext,
+    ) {
+        issuer_cap.is_active = true;
+        *vec_map::get_mut(&mut registry.issuers, &issuer_cap.issuer_address) = true;
+        event::emit(IssuerApproved {
+            issuer: issuer_cap.issuer_address,
+            issuer_name: issuer_cap.issuer_name,
+            approved_by: tx_context::sender(ctx),
         });
     }
 
@@ -723,6 +741,48 @@ module waltrust::credential {
             assert!(is_issuer_active(&registry, issuer_addr), 2);
             test_scenario::return_shared(registry);
             test_scenario::return_to_sender(&mut scenario, admin_cap);
+        };
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_reactivate_issuer_dedicated() {
+        let admin = @0xAD;
+        let issuer_addr = @0x11;
+        let mut scenario = test_scenario::begin(admin);
+
+        setup_issuer(&mut scenario, admin, issuer_addr);
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            transfer::public_transfer(cap, admin);
+        };
+
+        test_scenario::next_tx(&mut scenario, admin);
+        {
+            let admin_cap = test_scenario::take_from_sender<AdminCap>(&mut scenario);
+            let mut registry = test_scenario::take_shared<IssuerRegistry>(&mut scenario);
+            let mut cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            deactivate_issuer(&admin_cap, &mut registry, &mut cap, test_scenario::ctx(&mut scenario));
+            assert!(!is_issuer_active(&registry, issuer_addr), 0);
+            assert!(!cap.is_active, 1);
+            reactivate_issuer(&admin_cap, &mut registry, &mut cap, test_scenario::ctx(&mut scenario));
+            assert!(is_issuer_active(&registry, issuer_addr), 2);
+            assert!(cap.is_active, 3);
+            test_scenario::return_shared(registry);
+            test_scenario::return_to_sender(&mut scenario, admin_cap);
+            transfer::public_transfer(cap, issuer_addr);
+        };
+
+        test_scenario::next_tx(&mut scenario, issuer_addr);
+        {
+            let cap = test_scenario::take_from_sender<IssuerCap>(&mut scenario);
+            assert!(cap.is_active, 4);
+            let clock = test_scenario::take_shared<Clock>(&mut scenario);
+            issue_credential(&cap, b"blob", b"meta", b"hash", b"degree", b"Title", @0x22, b"Name", 0, &clock, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(clock);
+            test_scenario::return_to_sender(&mut scenario, cap);
         };
         test_scenario::end(scenario);
     }

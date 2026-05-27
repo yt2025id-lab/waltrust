@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { uploadToWalrus, uploadMetadataToWalrus, hashFile } from "@/lib/walrus";
-import { buildIssueCredentialTx } from "@/lib/contract";
+import { buildIssueCredentialTx, getIssuerCap } from "@/lib/contract";
+import { suiClient } from "@/lib/sui-client";
 import { WALTRUST_CONSTANTS, isValidSuiAddress } from "@/lib/utils";
-import { ConnectButton } from "@mysten/dapp-kit";
+import { ConnectWallet } from "@/components/connect-wallet";
 import { FileUp, Check, Loader2, AlertCircle, Shield, ArrowRight, ExternalLink } from "lucide-react";
 
 type IssueStep = "form" | "uploading" | "signing" | "success" | "error";
@@ -26,7 +27,18 @@ export function IssueContent() {
     recipientName: "",
     expiresAt: "",
   });
+  const [issuerName, setIssuerName] = useState("");
   const [file, setFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    if (!form.issuerCapId || !isValidSuiAddress(form.issuerCapId)) {
+      setIssuerName("");
+      return;
+    }
+    getIssuerCap(form.issuerCapId).then((cap) => {
+      if (cap) setIssuerName(cap.issuer_name);
+    });
+  }, [form.issuerCapId]);
 
   const handleIssue = async () => {
     if (!account || !file) return;
@@ -38,7 +50,7 @@ export function IssueContent() {
       const metadata = {
         title: form.title,
         credentialType: form.credentialType,
-        issuerName: "WalTrust Demo Issuer",
+        issuerName: issuerName || "Verified Issuer",
         recipientName: form.recipientName,
         issuedAt: new Date().toISOString(),
         expiresAt: form.expiresAt || null,
@@ -62,7 +74,21 @@ export function IssueContent() {
         expiresAt: form.expiresAt ? new Date(form.expiresAt).getTime() : 0,
       });
       const execResult = await signAndExecute({ transaction: tx });
-      setResult({ credentialId: execResult.digest, digest: execResult.digest });
+      const txDigest = execResult.digest;
+      let credentialId = txDigest;
+      try {
+        const txDetails: any = await suiClient.getTransactionBlock({
+          digest: txDigest,
+          options: { showEffects: true, showInput: false },
+        });
+        const created = txDetails?.effects?.created;
+        if (created && created.length > 0) {
+          credentialId = created[0].reference.objectId;
+        }
+      } catch {
+        // fallback: use tx digest as reference
+      }
+      setResult({ credentialId, digest: txDigest });
       setStep("success");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Transaction failed";
@@ -79,11 +105,7 @@ export function IssueContent() {
           <Shield className="w-16 h-16 text-neo-pink mx-auto mb-4" strokeWidth={3} />
           <h1 className="font-display font-800 text-3xl mb-3 uppercase">Issuer Dashboard</h1>
           <p className="font-mono text-sm text-neo-text2 mb-6">Connect wallet to issue credentials</p>
-          <div className="[&_button]:!bg-neo-green [&_button]:!border-[3px] [&_button]:!border-neo-border
-            [&_button]:!rounded-neo [&_button]:!shadow-neo [&_button]:!font-mono [&_button]:!text-sm
-            [&_button]:!font-bold [&_button]:!uppercase [&_button]:!tracking-wider">
-            <ConnectButton />
-          </div>
+          <ConnectWallet />
         </div>
       </div>
     );
@@ -228,17 +250,28 @@ export function IssueContent() {
           </div>
           <h3 className="font-display font-800 text-3xl text-neo-green uppercase mb-2">Credential Issued!</h3>
           <p className="font-mono text-sm text-neo-text2 mb-6">Stored on Walrus. Minted on SUI mainnet.</p>
-          <div className="bg-neo-bg2 rounded-neo p-4 border-[2px] border-neo-border text-left mb-6">
+          <div className="bg-neo-bg2 rounded-neo p-4 border-[2px] border-neo-border text-left mb-6 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="font-mono text-xs font-bold uppercase text-neo-text3">Credential ID</span>
+              <span className="font-mono text-xs text-neo-green truncate max-w-[200px]">{result.credentialId}</span>
+            </div>
             <div className="flex justify-between items-center">
               <span className="font-mono text-xs font-bold uppercase text-neo-text3">TX Digest</span>
-              <span className="font-mono text-xs text-neo-green truncate max-w-[240px]">{result.digest}</span>
+              <span className="font-mono text-xs text-neo-text2 truncate max-w-[200px]">{result.digest}</span>
             </div>
           </div>
-          <a href={`https://suiscan.xyz/mainnet/txblock/${result.digest}`}
-            target="_blank" rel="noopener noreferrer"
-            className="neo-btn-primary inline-flex items-center gap-2">
-            View on SuiScan <ExternalLink className="w-4 h-4" />
-          </a>
+          <div className="flex gap-3 justify-center">
+            <a href={`https://suiscan.xyz/mainnet/object/${result.credentialId}`}
+              target="_blank" rel="noopener noreferrer"
+              className="neo-btn-primary inline-flex items-center gap-2">
+              View Credential <ExternalLink className="w-4 h-4" />
+            </a>
+            <a href={`http://localhost:3000/verify/${result.credentialId}`}
+              target="_blank" rel="noopener noreferrer"
+              className="neo-btn-secondary inline-flex items-center gap-2">
+              Verify Link <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
         </div>
       )}
 

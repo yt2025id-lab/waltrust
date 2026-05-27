@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import { getCredential, parseCredentialFields, CredentialFields, checkCredentialValidity } from "@/lib/contract";
 import { VerifyResult } from "@/components/verify-result";
 
-type VerifyStatus = "loading" | "valid" | "revoked" | "expired" | "not_found";
+type VerifyStatus = "loading" | "valid" | "revoked" | "expired" | "not_found" | "error";
 
 export function VerifyContent({ id }: { id: string }) {
   const [status, setStatus] = useState<VerifyStatus>("loading");
   const [credential, setCredential] = useState<CredentialFields | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     if (!id) { setStatus("not_found"); return; }
     let cancelled = false;
+    setErrorMsg("");
     getCredential(id)
       .then((obj) => {
         if (cancelled) return;
@@ -21,9 +23,15 @@ export function VerifyContent({ id }: { id: string }) {
         setCredential(fields);
         setStatus(checkCredentialValidity(fields));
       })
-      .catch(() => {
+      .catch((err) => {
         if (cancelled) return;
-        setStatus("not_found");
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("404") || msg.includes("not found") || msg.includes("NotExists")) {
+          setStatus("not_found");
+        } else {
+          setStatus("error");
+          setErrorMsg(msg);
+        }
       });
     return () => { cancelled = true; };
   }, [id]);
@@ -37,7 +45,7 @@ export function VerifyContent({ id }: { id: string }) {
       <p className="font-mono text-xs text-neo-text3 mb-8 uppercase tracking-wider">
         ID: {id?.slice(0, 12)}...{id?.slice(-8)}
       </p>
-      <VerifyResult status={status} credential={credential} objectId={id} />
+      <VerifyResult status={status} credential={credential} objectId={id} errorMessage={errorMsg} />
     </section>
   );
 }

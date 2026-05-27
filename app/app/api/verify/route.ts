@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCredential, parseCredentialFields, checkCredentialValidity } from "@/lib/contract";
-import { fetchMetadataFromWalrus, fetchFromWalrus } from "@/lib/walrus";
+import { fetchMetadataFromWalrus, getWalrusDocUrl } from "@/lib/walrus";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -30,11 +30,14 @@ export async function GET(req: NextRequest) {
       status,
       credential: fields,
       metadata,
-      walrusDocUrl: `https://aggregator.walrus-mainnet.walrus.space/v1/blobs/${fields.walrus_blob_id}`,
+      walrusDocUrl: getWalrusDocUrl(fields.walrus_blob_id),
       suiscanUrl: `https://suiscan.xyz/mainnet/object/${objectId}`,
     });
   } catch (err) {
     console.error("Verify API error:", err);
-    return NextResponse.json({ valid: false, status: "error", error: String(err) }, { status: 500 });
+    return NextResponse.json(
+      { valid: false, status: "error", error: "Verification failed", details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
   }
 }

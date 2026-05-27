@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
-import { buildApproveIssuerTx, buildDeactivateIssuerTx } from "@/lib/contract";
-import { ConnectButton } from "@mysten/dapp-kit";
+import { buildApproveIssuerTx, buildDeactivateIssuerTx, buildReactivateIssuerTx } from "@/lib/contract";
 import { isValidSuiAddress } from "@/lib/utils";
-import { Shield, UserCheck, UserX, Loader2, Check, AlertCircle, ArrowRight } from "lucide-react";
+import { ConnectWallet } from "@/components/connect-wallet";
+import { Shield, UserCheck, UserX, RotateCcw, Loader2, Check, AlertCircle, ArrowRight } from "lucide-react";
 
 export function AdminContent() {
   const account = useCurrentAccount();
@@ -16,6 +16,7 @@ export function AdminContent() {
 
   const [approveForm, setApproveForm] = useState({ address: "", name: "" });
   const [deactivateForm, setDeactivateForm] = useState({ issuerCapId: "" });
+  const [reactivateForm, setReactivateForm] = useState({ issuerCapId: "" });
   const [step, setStep] = useState<"idle" | "signing" | "success" | "error">("idle");
   const [error, setError] = useState("");
   const [result, setResult] = useState<{ digest: string; action: string } | null>(null);
@@ -54,6 +55,23 @@ export function AdminContent() {
     }
   };
 
+  const handleReactivateIssuer = async () => {
+    if (!account || !adminCapId || !issuerRegistryId || !reactivateForm.issuerCapId) return;
+    try {
+      setStep("signing");
+      setError("");
+      const tx = buildReactivateIssuerTx(adminCapId, issuerRegistryId, reactivateForm.issuerCapId);
+      const execResult = await signAndExecute({ transaction: tx });
+      setResult({ digest: execResult.digest, action: "reactivated" });
+      setStep("success");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Transaction failed";
+      setError(message);
+      console.error("Reactivate error:", err);
+      setStep("error");
+    }
+  };
+
   if (!account) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
@@ -61,11 +79,7 @@ export function AdminContent() {
           <Shield className="w-16 h-16 text-neo-blue mx-auto mb-4" strokeWidth={3} />
           <h1 className="font-display font-800 text-3xl mb-3 uppercase">Admin Dashboard</h1>
           <p className="font-mono text-sm text-neo-text2 mb-6">Connect admin wallet</p>
-          <div className="[&_button]:!bg-neo-blue [&_button]:!border-[3px] [&_button]:!border-neo-border
-            [&_button]:!rounded-neo [&_button]:!shadow-neo [&_button]:!font-mono [&_button]:!text-sm
-            [&_button]:!font-bold [&_button]:!uppercase [&_button]:!tracking-wider">
-            <ConnectButton />
-          </div>
+          <ConnectWallet />
         </div>
       </div>
     );
@@ -75,6 +89,7 @@ export function AdminContent() {
   const isRegistryValid = issuerRegistryId === "" || isValidSuiAddress(issuerRegistryId);
   const isIssuerAddrValid = approveForm.address === "" || isValidSuiAddress(approveForm.address);
   const isDeactivateCapValid = deactivateForm.issuerCapId === "" || isValidSuiAddress(deactivateForm.issuerCapId);
+  const isReactivateCapValid = reactivateForm.issuerCapId === "" || isValidSuiAddress(reactivateForm.issuerCapId);
 
   return (
     <section className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
@@ -110,7 +125,7 @@ export function AdminContent() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="neo-card shadow-neo-green">
           <span className="neo-tag-green mb-4 inline-flex items-center gap-1">
             <UserCheck className="w-3 h-3" /> Approve
@@ -159,6 +174,29 @@ export function AdminContent() {
               className="neo-btn-pink w-full flex items-center justify-center gap-2 text-sm">
               <UserX className="w-4 h-4" />
               Deactivate Issuer
+            </button>
+          </div>
+        </div>
+
+        <div className="neo-card shadow-neo">
+          <span className="neo-tag-yellow mb-4 inline-flex items-center gap-1">
+            <RotateCcw className="w-3 h-3" /> Reactivate
+          </span>
+          <div className="space-y-4">
+            <div>
+              <label className="neo-label">IssuerCap ID</label>
+              <input type="text" placeholder="0x..." value={reactivateForm.issuerCapId}
+                onChange={(e) => setReactivateForm({ issuerCapId: e.target.value })}
+                className={`neo-input font-mono text-sm ${!isReactivateCapValid && reactivateForm.issuerCapId ? "border-neo-pink" : ""}`} />
+              {!isReactivateCapValid && reactivateForm.issuerCapId && (
+                <p className="font-mono text-xs text-neo-pink mt-1">Invalid address format</p>
+              )}
+            </div>
+            <button onClick={handleReactivateIssuer}
+              disabled={!adminCapId || !reactivateForm.issuerCapId || !isAdminCapValid || !isReactivateCapValid}
+              className="neo-btn-secondary w-full flex items-center justify-center gap-2 text-sm">
+              <RotateCcw className="w-4 h-4" />
+              Reactivate Issuer
             </button>
           </div>
         </div>

@@ -10,7 +10,10 @@ const MAGIC_BYTES: Record<string, Uint8Array[]> = {
 
 function validateFileSignature(bytes: Uint8Array, mimeType: string): boolean {
   const signatures = MAGIC_BYTES[mimeType];
-  if (!signatures) return true;
+  if (!signatures) {
+    const allowed = Object.keys(MAGIC_BYTES).join(", ");
+    throw new Error(`No magic bytes registered for ${mimeType}. Must be one of: ${allowed}`);
+  }
   return signatures.some((sig) => {
     if (bytes.length < sig.length) return false;
     return sig.every((b, i) => bytes[i] === b);
@@ -42,10 +45,17 @@ export async function POST(req: NextRequest) {
     const fileBuffer = await file.arrayBuffer();
     const fileBytes = new Uint8Array(fileBuffer);
 
-    if (!validateFileSignature(fileBytes, file.type)) {
+    try {
+      if (!validateFileSignature(fileBytes, file.type)) {
+        return NextResponse.json(
+          { error: "File content does not match its declared type" },
+          { status: 400 }
+        );
+      }
+    } catch (sigErr) {
       return NextResponse.json(
-        { error: "File content does not match its declared type" },
-        { status: 400 }
+        { error: "File type validation error", details: sigErr instanceof Error ? sigErr.message : String(sigErr) },
+        { status: 500 }
       );
     }
 

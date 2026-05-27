@@ -3,15 +3,16 @@
 import { CredentialFields } from "@/lib/contract";
 import { formatDate, getCredentialTypeLabel, truncateAddress } from "@/lib/utils";
 import { getWalrusDocUrl, fetchFromWalrus } from "@/lib/walrus";
-import { ShieldCheck, ShieldX, Clock, Search, ExternalLink, FileText, Download } from "lucide-react";
+import { ShieldCheck, ShieldX, Clock, Search, ExternalLink, FileText, Download, AlertCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
-type VerifyStatus = "loading" | "valid" | "revoked" | "expired" | "not_found";
+type VerifyStatus = "loading" | "valid" | "revoked" | "expired" | "not_found" | "error";
 
 interface VerifyResultProps {
   status: VerifyStatus;
   credential: CredentialFields | null;
   objectId: string;
+  errorMessage?: string;
 }
 
 const STATUS_STYLES = {
@@ -47,7 +48,7 @@ const STATUS_STYLES = {
   },
 } as const;
 
-export function VerifyResult({ status, credential, objectId }: VerifyResultProps) {
+export function VerifyResult({ status, credential, objectId, errorMessage }: VerifyResultProps & { errorMessage?: string }) {
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const docUrlRef = useRef<string | null>(null);
@@ -103,6 +104,30 @@ export function VerifyResult({ status, credential, objectId }: VerifyResultProps
         <p className="font-mono text-sm text-neo-text2">
           No credential at this address. Double-check the ID.
         </p>
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="neo-card shadow-neo-pink p-12 text-center">
+        <div className="w-20 h-20 mx-auto mb-6 bg-neo-pink/10 border-[3px] border-neo-pink rounded-neo
+          flex items-center justify-center">
+          <AlertCircle className="w-10 h-10 text-neo-pink" />
+        </div>
+        <h3 className="font-display font-800 text-2xl mb-2 text-neo-pink uppercase">Verification Failed</h3>
+        <p className="font-mono text-sm text-neo-text2">
+          Could not verify credential. The network may be unavailable.
+        </p>
+        {errorMessage && (
+          <p className="font-mono text-xs text-neo-text3 mt-3 bg-neo-bg2 p-2 rounded-neo border border-neo-border-light break-all">
+            {errorMessage}
+          </p>
+        )}
+        <button onClick={() => window.location.reload()}
+          className="neo-btn-secondary mt-6 text-xs">
+          Retry
+        </button>
       </div>
     );
   }

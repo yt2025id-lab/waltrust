@@ -43,6 +43,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing query params: id | owner+type" }, { status: 400 });
   } catch (err) {
     console.error("Credential API error:", err);
-    return NextResponse.json({ error: "Query failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Query failed", details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
   }
 }

@@ -51,7 +51,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         defaultNetwork={network}
         createClient={createClient}
       >
-        <WalletProvider autoConnect>
+        <WalletProvider autoConnect enableUnsafeBurner>
           {children}
         </WalletProvider>
       </SuiClientProvider>

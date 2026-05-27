@@ -1,11 +1,11 @@
 "use client";
 
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { ConnectButton } from "@mysten/dapp-kit";
 import { useEffect, useState, useRef } from "react";
 import { getWalletCredentials, parseCredentialFields, CredentialFields } from "@/lib/contract";
 import { CredentialCard } from "@/components/credential-card";
 import { Shield, Wallet } from "lucide-react";
+import { ConnectWallet } from "@/components/connect-wallet";
 
 export function WalletContent() {
   const account = useCurrentAccount();
@@ -39,11 +39,7 @@ export function WalletContent() {
           <Wallet className="w-16 h-16 text-neo-pink mx-auto mb-4" strokeWidth={3} />
           <h1 className="font-display font-800 text-3xl mb-3 uppercase">My Credentials</h1>
           <p className="font-mono text-sm text-neo-text2 mb-6">Connect wallet to view credentials</p>
-          <div className="[&_button]:!bg-neo-green [&_button]:!border-[3px] [&_button]:!border-neo-border
-            [&_button]:!rounded-neo [&_button]:!shadow-neo [&_button]:!font-mono [&_button]:!text-sm
-            [&_button]:!font-bold [&_button]:!uppercase [&_button]:!tracking-wider">
-            <ConnectButton />
-          </div>
+          <ConnectWallet />
         </div>
       </div>
     );

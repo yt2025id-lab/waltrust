@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { buildRevokeCredentialTx, getCredential, parseCredentialFields } from "@/lib/contract";
-import { ConnectButton } from "@mysten/dapp-kit";
 import { isValidSuiAddress } from "@/lib/utils";
+import { ConnectWallet } from "@/components/connect-wallet";
 import { Shield, ShieldX, Loader2, Check, AlertCircle, Search, ArrowRight } from "lucide-react";
 
 export function RevokeContent() {
@@ -59,11 +59,7 @@ export function RevokeContent() {
           <ShieldX className="w-16 h-16 text-neo-pink mx-auto mb-4" strokeWidth={3} />
           <h1 className="font-display font-800 text-3xl mb-3 uppercase">Revoke Credential</h1>
           <p className="font-mono text-sm text-neo-text2 mb-6">Connect wallet to revoke</p>
-          <div className="[&_button]:!bg-neo-pink [&_button]:!border-[3px] [&_button]:!border-neo-border
-            [&_button]:!rounded-neo [&_button]:!shadow-neo [&_button]:!font-mono [&_button]:!text-sm
-            [&_button]:!font-bold [&_button]:!uppercase [&_button]:!tracking-wider">
-            <ConnectButton />
-          </div>
+          <ConnectWallet />
         </div>
       </div>
     );

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ConnectButton } from "@mysten/dapp-kit";
 import { useState, useCallback } from "react";
 import { Shield, Menu, X } from "lucide-react";
+import { ConnectWallet } from "@/components/connect-wallet";
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,13 +58,7 @@ export function Header() {
               <span className="neo-tag-green text-[9px]">LIVE</span>
               <span className="neo-tag-yellow text-[9px]">MAINNET</span>
             </div>
-            <div className="[&_button]:!bg-neo-surface [&_button]:!border-[3px] [&_button]:!border-neo-border
-              [&_button]:!rounded-neo [&_button]:!shadow-neo-sm [&_button]:!font-mono [&_button]:!text-xs
-              [&_button]:!font-bold [&_button]:!uppercase [&_button]:!tracking-wider
-              [&_button]:hover:!shadow-neo-hover [&_button]:hover:!-translate-y-0.5
-              [&_button]:!transition-all [&_button]:!duration-200">
-              <ConnectButton />
-            </div>
+            <ConnectWallet />
             <button
               className="md:hidden w-10 h-10 flex items-center justify-center
                 border-[3px] border-neo-border rounded-neo bg-neo-surface shadow-neo-sm"

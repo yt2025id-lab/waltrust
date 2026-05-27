@@ -7,7 +7,7 @@ vi.mock("@/lib/sui-client", () => ({
   ISSUER_CAP_TYPE: "0x0::credential::IssuerCap",
 }));
 
-const { parseCredentialFields, checkCredentialValidity } = await import("@/lib/contract");
+const { parseCredentialFields, checkCredentialValidity, parseIssuerCapFields, buildVerifyCredentialTx, buildReactivateIssuerTx } = await import("@/lib/contract");
 
 describe("parseCredentialFields", () => {
   it("parses valid credential object", () => {
@@ -115,5 +115,45 @@ describe("checkCredentialValidity", () => {
 
   it("returns 'valid' for expires_at=0 (no expiry)", () => {
     expect(checkCredentialValidity({ ...baseFields, expires_at: "0" })).toBe("valid");
+  });
+});
+
+describe("parseIssuerCapFields", () => {
+  it("parses valid IssuerCap object", () => {
+    const obj = {
+      data: {
+        content: {
+          fields: {
+            issuer_address: "0xissuer",
+            issuer_name: "Test University",
+            is_active: true,
+          },
+        },
+      },
+    };
+    const result = parseIssuerCapFields(obj);
+    expect(result).not.toBeNull();
+    expect(result!.issuer_address).toBe("0xissuer");
+    expect(result!.issuer_name).toBe("Test University");
+    expect(result!.is_active).toBe(true);
+  });
+
+  it("returns null for missing fields", () => {
+    expect(parseIssuerCapFields({})).toBeNull();
+    expect(parseIssuerCapFields({ data: {} })).toBeNull();
+  });
+});
+
+describe("buildVerifyCredentialTx", () => {
+  it("returns a Transaction", () => {
+    const tx = buildVerifyCredentialTx("0xcredential");
+    expect(tx).toBeDefined();
+  });
+});
+
+describe("buildReactivateIssuerTx", () => {
+  it("returns a Transaction", () => {
+    const tx = buildReactivateIssuerTx("0xadmin", "0xregistry", "0xcap");
+    expect(tx).toBeDefined();
   });
 });

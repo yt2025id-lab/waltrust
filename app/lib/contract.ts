@@ -93,6 +93,25 @@ export function buildDeactivateIssuerTx(
   return tx;
 }
 
+export function buildReactivateIssuerTx(
+  adminCapId: string,
+  issuerRegistryId: string,
+  issuerCapId: string
+): Transaction {
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${CONTRACT.packageId}::${CONTRACT.credentialModule}::reactivate_issuer`,
+    arguments: [
+      tx.object(adminCapId),
+      tx.object(issuerRegistryId),
+      tx.object(issuerCapId),
+    ],
+  });
+
+  return tx;
+}
+
 export interface CredentialFields {
   walrus_blob_id: string;
   walrus_metadata_blob_id: string;
@@ -109,6 +128,12 @@ export interface CredentialFields {
   extra_fields: Record<string, string>;
 }
 
+export interface IssuerCapFields {
+  issuer_address: string;
+  issuer_name: string;
+  is_active: boolean;
+}
+
 export async function getCredential(credentialObjectId: string) {
   return suiClient.getObject({
     id: credentialObjectId,
@@ -118,6 +143,38 @@ export async function getCredential(credentialObjectId: string) {
       showType: true,
     },
   });
+}
+
+export async function getIssuerCap(issuerCapId: string): Promise<IssuerCapFields | null> {
+  try {
+    const obj = await suiClient.getObject({
+      id: issuerCapId,
+      options: { showContent: true },
+    });
+    const fields = (obj.data?.content as any)?.fields;
+    if (!fields) return null;
+    return {
+      issuer_address: fields.issuer_address,
+      issuer_name: fields.issuer_name,
+      is_active: fields.is_active,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function parseIssuerCapFields(obj: any): IssuerCapFields | null {
+  try {
+    const fields = obj.data?.content?.fields;
+    if (!fields) return null;
+    return {
+      issuer_address: fields.issuer_address,
+      issuer_name: fields.issuer_name,
+      is_active: fields.is_active,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function getWalletCredentials(walletAddress: string) {
@@ -182,4 +239,16 @@ export function checkCredentialValidity(fields: CredentialFields): "valid" | "re
   const expiresAt = Number(fields.expires_at);
   if (expiresAt > 0 && now > expiresAt) return "expired";
   return "valid";
+}
+
+export function buildVerifyCredentialTx(credentialId: string): Transaction {
+  const tx = new Transaction();
+  tx.moveCall({
+    target: `${CONTRACT.packageId}::${CONTRACT.credentialModule}::verify_credential`,
+    arguments: [
+      tx.object(credentialId),
+      tx.object("0x6"),
+    ],
+  });
+  return tx;
 }
