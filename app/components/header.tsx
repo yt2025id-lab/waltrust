@@ -25,9 +25,9 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 group">
             <img
-              src="/waltrust-logo-horizontal.svg"
+              src="/logo%20WalTrust.png"
               alt="WalTrust"
-              className="h-9 w-auto group-hover:-translate-y-0.5 transition-transform duration-200"
+              className="h-10 w-auto group-hover:-translate-y-0.5 transition-transform duration-200"
             />
           </Link>
 

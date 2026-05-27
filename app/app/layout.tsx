@@ -9,13 +9,17 @@ export const metadata: Metadata = {
   keywords: ["WalTrust", "SUI", "Walrus", "Tatum", "credential verification", "Web3"],
   icons: {
     icon: "/favicon.svg",
-    apple: "/waltrust-logo.svg",
+    apple: "/logo%20WalTrust.png",
   },
   openGraph: {
     title: "WalTrust — Decentralized Credential Verification",
     description: "Verify credentials trustlessly on SUI + Walrus",
     type: "website",
-    images: ["/waltrust-logo.svg"],
+    images: [{ url: "/waltrust-og.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/waltrust-og.png"],
   },
 };
 
