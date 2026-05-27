@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useCallback } from "react";
-import { Shield, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ConnectWallet } from "@/components/connect-wallet";
 
 export function Header() {
@@ -24,16 +24,11 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-neo-green border-[3px] border-neo-border rounded-neo
-              flex items-center justify-center shadow-neo-sm
-              group-hover:shadow-neo-hover group-hover:-translate-y-0.5
-              transition-all duration-200">
-              <Shield className="w-5 h-5 text-neo-text" strokeWidth={3} />
-            </div>
-            <div className="flex items-baseline">
-              <span className="font-display font-800 text-xl tracking-tight text-neo-text">Wal</span>
-              <span className="font-display font-800 text-xl tracking-tight text-neo-green">Trust</span>
-            </div>
+            <img
+              src="/waltrust-logo-horizontal.svg"
+              alt="WalTrust"
+              className="h-9 w-auto group-hover:-translate-y-0.5 transition-transform duration-200"
+            />
           </Link>
 
           <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
