@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Shield -->
+  <path d="M50 5 L85 25 L85 60 C85 85 50 95 50 95 C50 95 15 85 15 60 L15 25 Z"
+        fill="#FFFEF2" stroke="#0A0A0A" stroke-width="5" stroke-linejoin="miter"/>
+  <path d="M50 15 L78 30 L78 58 C78 78 50 85 50 85 C50 85 22 78 22 58 L22 30 Z"
+        fill="#00E58A" stroke="#0A0A0A" stroke-width="3" stroke-linejoin="miter"/>
+  <!-- Checkmark -->
+  <path d="M38 50 L48 62 L63 40"
+        fill="none" stroke="#0A0A0A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

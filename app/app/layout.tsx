@@ -7,10 +7,15 @@ export const metadata: Metadata = {
   description:
     "Verify credentials trustlessly. Documents on Walrus, attestations on SUI, powered by Tatum RPC.",
   keywords: ["WalTrust", "SUI", "Walrus", "Tatum", "credential verification", "Web3"],
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/waltrust-logo.svg",
+  },
   openGraph: {
     title: "WalTrust — Decentralized Credential Verification",
     description: "Verify credentials trustlessly on SUI + Walrus",
     type: "website",
+    images: ["/waltrust-logo.svg"],
   },
 };
 

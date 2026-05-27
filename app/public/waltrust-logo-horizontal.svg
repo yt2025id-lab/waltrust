@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&amp;display=swap');
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="200" fill="#FFFEF2" rx="8" ry="8"/>
+
+  <!-- Shield icon -->
+  <g transform="translate(30, 20)">
+    <path d="M80 20 L150 55 L150 130 C150 175 80 160 80 160 C80 160 10 175 10 130 L10 55 Z"
+          fill="#FFFEF2" stroke="#0A0A0A" stroke-width="7" stroke-linejoin="miter"/>
+    <path d="M80 35 L138 65 L138 128 C138 162 80 148 80 148 C80 148 22 162 22 128 L22 65 Z"
+          fill="#00E58A" stroke="#0A0A0A" stroke-width="4" stroke-linejoin="miter"/>
+    <path d="M80 48 L128 72 L128 120 C80 140 80 140 80 140 C80 140 32 140 32 120 L32 72 Z"
+          fill="#FFFEF2" stroke="#0A0A0A" stroke-width="3" stroke-linejoin="miter"/>
+    <path d="M55 95 L75 118 L105 78"
+          fill="none" stroke="#00E58A" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wal text -->
+  <text x="210" y="125" font-family="'Space Grotesk', sans-serif" font-weight="800" font-size="72"
+        fill="#0A0A0A" letter-spacing="-2">
+    Wal
+  </text>
+
+  <!-- Trust text -->
+  <text x="330" y="125" font-family="'Space Grotesk', sans-serif" font-weight="800" font-size="72"
+        fill="#00E58A" letter-spacing="-2">
+    Trust
+  </text>
+
+  <!-- Brutalist underline -->
+  <line x1="200" y1="150" x2="460" y2="150" stroke="#0A0A0A" stroke-width="5"/>
+
+  <!-- Brutalist dots -->
+  <rect x="15" y="15" width="10" height="10" fill="#0A0A0A"/>
+  <rect x="575" y="15" width="10" height="10" fill="#0A0A0A"/>
+  <rect x="15" y="175" width="10" height="10" fill="#FF3366"/>
+  <rect x="575" y="175" width="10" height="10" fill="#00E58A"/>
+</svg>
